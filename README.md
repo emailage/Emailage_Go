@@ -28,10 +28,20 @@ import github.com/emailage/emailage
 
 ### Settings
 
-### Email Validation
+### Email Only Validation
 
-```
+```Go
 res, err := client.EmailOnlyScore("nigerian.prince@legit.ru")
+if err != nil {
+    log.Fatalln(err)
+}
+fmt.Printf("Result: %+v\n", res.Query)
+```
+
+### IP Only Validation
+
+```Go
+res, err := client.IPOnlyScore("192.168.0.1")
 if err != nil {
     log.Fatalln(err)
 }
