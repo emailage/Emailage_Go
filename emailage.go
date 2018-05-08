@@ -95,7 +95,8 @@ func (e *Emailage) EmailAndIPScore(email, ip string, params map[string]string) (
 	return e.base(email+"+"+ip, params)
 }
 
-// base
+// base is an intermediate method call that all exposed methods call which then proxy's
+// that call to the API
 func (e *Emailage) base(input string, params map[string]string) (*Response, error) {
 	if params != nil {
 		params["format"] = e.opts.Format
