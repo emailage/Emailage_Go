@@ -62,42 +62,50 @@ func New(co *ClientOpts) (*Emailage, error) {
 	return e, nil
 }
 
-// EmailOnlyScore provides a risk score for the provided email address.
-func (e *Emailage) EmailOnlyScore(email string) (*Response, error) {
-	if !IsEmail(email) {
-		return nil, errors.New("invalid email address")
-	}
+var (
+	errInvalidEmail = errors.New("invalid email address")
+	errInvalidIP    = errors.New("invalid ip address")
+)
+
+// base
+func (e *Emailage) base(input string) (*Response, error) {
 	params := map[string]string{
 		"format": e.opts.Format,
-		"query":  email,
+		"query":  input,
 	}
 	var r Response
-	if err := e.call("email_only_score", params, &r); err != nil {
+	if err := e.call(params, &r); err != nil {
 		return nil, err
 	}
 	return &r, nil
+}
+
+// EmailOnlyScore provides a risk score for the provided email address.
+func (e *Emailage) EmailOnlyScore(email string) (*Response, error) {
+	if !IsEmail(email) {
+		return nil, errInvalidEmail
+	}
+	return e.base(email)
 }
 
 // IPAddressOnlyScore provides a risk score for the provided IP address.
 func (e *Emailage) IPAddressOnlyScore(ip string) (*Response, error) {
 	if !IsIP(ip) {
-		return nil, errors.New("invalid ip address")
+		return nil, errInvalidIP
 	}
-	params := map[string]string{
-		"format": e.opts.Format,
-		"query":  ip,
-	}
-	var r Response
-	if err := e.call("ip_only_score", params, &r); err != nil {
-		return nil, err
-	}
-	return &r, nil
+	return e.base(ip)
 }
 
 // EmailAndIPScore provides a risk score for the provided email/IP address
 // combination. IP4 and IP6 addresses are supported.
 func (e *Emailage) EmailAndIPScore(email, ip string) (*Response, error) {
-	return nil, nil
+	if !IsEmail(email) {
+		return nil, errInvalidEmail
+	}
+	if !IsIP(ip) {
+		return nil, errInvalidIP
+	}
+	return e.base(email + "+" + ip)
 }
 
 // removeBOM removes the first 3 bytes of the API response.  Those
@@ -116,7 +124,7 @@ func removeBOM(d io.ReadCloser) (io.Reader, error) {
 }
 
 // call setups up the request to the Classic API and executes it
-func (e *Emailage) call(caller string, params map[string]string, fres interface{}) error {
+func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	res, err := e.oc.Get(e.opts.Endpoint, params, &oauth.AccessToken{})
 	if err != nil {
 		return err
@@ -132,7 +140,7 @@ func (e *Emailage) call(caller string, params map[string]string, fres interface{
 		if _, err := buf.ReadFrom(res.Body); err != nil {
 			return err
 		}
-		return newServiceError(buf.String(), caller, res.StatusCode)
+		return errors.New(buf.String())
 	}
 	if fres == nil {
 		return nil

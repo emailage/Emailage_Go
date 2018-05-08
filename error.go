@@ -1,27 +1,5 @@
 package emailage
 
-// serviceError
-type serviceError struct {
-	Message    string `json:"message"`
-	CallCode   string `json:"call_code"`
-	StatusCode int    `json:"status_code"`
-}
-
-// newServiceError create a new ServiceError
-func newServiceError(msg, code string, status int) *serviceError {
-	return &serviceError{
-		Message:    msg,
-		CallCode:   code,
-		StatusCode: status,
-	}
-}
-
-// Error returns a string of the error message for the ServiceError
-// type having it implement the Error interface
-func (e *serviceError) Error() string {
-	return e.Message
-}
-
 // ErrorCodeLookup provies the ability to look up an error code
 // returned from the API
 func ErrorCodeLookup(code int) string {

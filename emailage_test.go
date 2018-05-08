@@ -250,9 +250,7 @@ func Test_removeBOM(t *testing.T) {
 		args    args
 		want    io.Reader
 		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := removeBOM(tt.args.d)
