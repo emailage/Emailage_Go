@@ -67,45 +67,50 @@ var (
 	errInvalidIP    = errors.New("invalid ip address")
 )
 
+// EmailOnlyScore provides a risk score for the provided email address.
+func (e *Emailage) EmailOnlyScore(email string, params map[string]string) (*Response, error) {
+	if !IsEmail(email) {
+		return nil, errInvalidEmail
+	}
+	return e.base(email, params)
+}
+
+// IPAddressOnlyScore provides a risk score for the provided IP address.
+func (e *Emailage) IPAddressOnlyScore(ip string, params map[string]string) (*Response, error) {
+	if !IsIP(ip) {
+		return nil, errInvalidIP
+	}
+	return e.base(ip, params)
+}
+
+// EmailAndIPScore provides a risk score for the provided email/IP address
+// combination. IP4 and IP6 addresses are supported.
+func (e *Emailage) EmailAndIPScore(email, ip string, params map[string]string) (*Response, error) {
+	if !IsEmail(email) {
+		return nil, errInvalidEmail
+	}
+	if !IsIP(ip) {
+		return nil, errInvalidIP
+	}
+	return e.base(email+"+"+ip, params)
+}
+
 // base
-func (e *Emailage) base(input string) (*Response, error) {
-	params := map[string]string{
-		"format": e.opts.Format,
-		"query":  input,
+func (e *Emailage) base(input string, params map[string]string) (*Response, error) {
+	if params != nil {
+		params["format"] = e.opts.Format
+		params["query"] = input
+	} else {
+		params = map[string]string{
+			"format": e.opts.Format,
+			"query":  input,
+		}
 	}
 	var r Response
 	if err := e.call(params, &r); err != nil {
 		return nil, err
 	}
 	return &r, nil
-}
-
-// EmailOnlyScore provides a risk score for the provided email address.
-func (e *Emailage) EmailOnlyScore(email string) (*Response, error) {
-	if !IsEmail(email) {
-		return nil, errInvalidEmail
-	}
-	return e.base(email)
-}
-
-// IPAddressOnlyScore provides a risk score for the provided IP address.
-func (e *Emailage) IPAddressOnlyScore(ip string) (*Response, error) {
-	if !IsIP(ip) {
-		return nil, errInvalidIP
-	}
-	return e.base(ip)
-}
-
-// EmailAndIPScore provides a risk score for the provided email/IP address
-// combination. IP4 and IP6 addresses are supported.
-func (e *Emailage) EmailAndIPScore(email, ip string) (*Response, error) {
-	if !IsEmail(email) {
-		return nil, errInvalidEmail
-	}
-	if !IsIP(ip) {
-		return nil, errInvalidIP
-	}
-	return e.base(email + "+" + ip)
 }
 
 // removeBOM removes the first 3 bytes of the API response.  Those

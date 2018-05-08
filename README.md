@@ -18,7 +18,7 @@ The package only supports `HMAC-SHA1` at this time however it will be extended t
 git clone https://github.com/emailage/Emailage_Go.git
 ```
 
-This package can be imported with 
+This package can be imported with:
 
 ```Go
 import github.com/emailage/emailage
@@ -50,8 +50,12 @@ fmt.Printf("Result: %+v\n", res.Query)
 
 ### Email and IP Validation
 
+```Go
+res, err := client.EmailAndIPScore("nigerian.prince@legit.ru", "192.168.0.1")
+if err != nil {
+    log.Fatalln(err)
+}
+fmt.Printf("Result: %+v\n", res.Query)
+```
+
 ### Email and IP Validation with extra input parameters
-
-### Mark email as fraud/good
-
-## Frequent asked integration problems

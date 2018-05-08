@@ -141,7 +141,8 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 		oc   *oauth.Consumer
 	}
 	type args struct {
-		email string
+		email  string
+		params map[string]string
 	}
 	tests := []struct {
 		name    string
@@ -158,7 +159,7 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 				opts: tt.fields.opts,
 				oc:   tt.fields.oc,
 			}
-			got, err := e.EmailOnlyScore(tt.args.email)
+			got, err := e.EmailOnlyScore(tt.args.email, tt.args.params)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Emailage.EmailOnlyScore() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -176,7 +177,8 @@ func TestEmailage_IPAddressOnlyScore(t *testing.T) {
 		oc   *oauth.Consumer
 	}
 	type args struct {
-		ip string
+		ip     string
+		params map[string]string
 	}
 	tests := []struct {
 		name    string
@@ -193,7 +195,7 @@ func TestEmailage_IPAddressOnlyScore(t *testing.T) {
 				opts: tt.fields.opts,
 				oc:   tt.fields.oc,
 			}
-			got, err := e.IPAddressOnlyScore(tt.args.ip)
+			got, err := e.IPAddressOnlyScore(tt.args.ip, tt.args.params)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Emailage.IPAddressOnlyScore() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -211,8 +213,9 @@ func TestEmailage_EmailAndIPScore(t *testing.T) {
 		oc   *oauth.Consumer
 	}
 	type args struct {
-		email string
-		ip    string
+		email  string
+		ip     string
+		params map[string]string
 	}
 	tests := []struct {
 		name    string
@@ -229,7 +232,7 @@ func TestEmailage_EmailAndIPScore(t *testing.T) {
 				opts: tt.fields.opts,
 				oc:   tt.fields.oc,
 			}
-			got, err := e.EmailAndIPScore(tt.args.email, tt.args.ip)
+			got, err := e.EmailAndIPScore(tt.args.email, tt.args.ip, tt.args.params)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Emailage.EmailAndIPScore() error = %v, wantErr %v", err, tt.wantErr)
 				return
