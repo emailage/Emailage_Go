@@ -44,7 +44,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	res, err := client.EmailOnlyScore("nigerian.prince@legit.ru")
+	res, err := client.EmailOnlyScore("nigerian.prince@legit.ru", nil)
 	if err != nil {
 		fmt.Println("error: ", err)
 		os.Exit(1)
