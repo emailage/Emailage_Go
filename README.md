@@ -31,7 +31,12 @@ import github.com/emailage/emailage
 ### Email Only Validation
 
 ```Go
-res, err := client.EmailOnlyScore("nigerian.prince@legit.ru")
+params := map[string]string{
+    "first_seen_days": 30,
+    "phone": "8675309",
+    "transorigin": "O",
+}
+res, err := client.EmailOnlyScore("nigerian.prince@legit.ru", params)
 if err != nil {
     log.Fatalln(err)
 }
@@ -41,7 +46,7 @@ fmt.Printf("Result: %+v\n", res.Query)
 ### IP Only Validation
 
 ```Go
-res, err := client.IPOnlyScore("192.168.0.1")
+res, err := client.IPOnlyScore("192.168.0.1", nil)
 if err != nil {
     log.Fatalln(err)
 }
@@ -51,7 +56,11 @@ fmt.Printf("Result: %+v\n", res.Query)
 ### Email and IP Validation
 
 ```Go
-res, err := client.EmailAndIPScore("nigerian.prince@legit.ru", "192.168.0.1")
+params := map[string]string{
+    "billcity": "Phoenix",
+    "responseCount": 10,
+}
+res, err := client.EmailAndIPScore("nigerian.prince@legit.ru", "192.168.0.1", params)
 if err != nil {
     log.Fatalln(err)
 }
