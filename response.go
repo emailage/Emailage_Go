@@ -7,79 +7,79 @@ type Response struct {
 
 // Query
 type Query struct {
-	Email          string          `json:"email"`
-	QueryType      string          `json:"queryType"`
-	Count          int64           `json:"count"`
-	Created        string          `json:"created"`
-	Lang           string          `json:"lang"`
-	ResponseCount  int64           `json:"responseCount"`
-	Results        []Result        `json:"results"`
-	ResponseStatus *ResponseStatus `json:"responseStatus"`
+	Email          string          `json:"email,omitempty"`
+	QueryType      string          `json:"queryType,omitempty"`
+	Count          int64           `json:"count,omitempty"`
+	Created        string          `json:"created,omitempty"`
+	Lang           string          `json:"lang,omitempty"`
+	ResponseCount  int64           `json:"responseCount,omitempty"`
+	Results        []Result        `json:"results,omitempty"`
+	ResponseStatus *ResponseStatus `json:"responseStatus,omitempty"`
 }
 
 // ResponseStatus
 type ResponseStatus struct {
-	Status      string `json:"status"`
-	ErrorCode   string `json:"errorCode"`
-	Description string `json:"description"`
+	Status      string `json:"status,omitempty"`
+	ErrorCode   string `json:"errorCode,omitempty"`
+	Description string `json:"description,omitempty"`
 }
 
-// SMLink
+// SMLink contains links to social media
 type SMLink struct {
-	Source string `json:"source"`
-	Link   string `json:"link"`
+	Source string `json:"source,omitempty"`
+	Link   string `json:"link,omitempty"`
 }
 
 // Result
 type Result struct {
-	Userdefinedrecordid   string   `json:"userdefinedrecordid"`
-	Email                 string   `json:"email"`
-	EName                 string   `json:"eName"`
-	EmailAge              string   `json:"emailAge"`
-	EmailCreationDays     string   `json:"email_creation_days"`
-	DomainAge             string   `json:"domainAge"`
-	DomainCreationDays    string   `json:"domain_creation_days"`
-	FirstVerificationDate string   `json:"firstVerificationDate"`
-	FirstSeenDays         string   `json:"first_seen_days"`
-	LastVerificationDate  string   `json:"lastVerificationDate"`
-	Status                string   `json:"status"`
-	Country               string   `json:"country"`
-	FraudRisk             string   `json:"fraudRisk"`
-	EAScore               string   `json:"EAScore"`
-	EAReason              string   `json:"EAReason"`
-	EAStatusID            string   `json:"EAStatusID"`
-	EAReasonID            string   `json:"EAReasonID"`
-	EAAdviceID            string   `json:"EAAdviceID"`
-	EAAdvice              string   `json:"EAAdvice"`
-	EARiskBandID          string   `json:"EARiskBandID"`
-	EARiskBand            string   `json:"EARiskBand"`
-	SourceIndustry        string   `json:"source_industry"`
-	FraudType             string   `json:"fraud_type"`
-	Lastflaggedon         string   `json:"lastflaggedon"`
-	Dob                   string   `json:"dob"`
-	Gender                string   `json:"gender"`
-	Location              string   `json:"location"`
-	Smfriends             string   `json:"smfriends"`
-	Totalhits             string   `json:"totalhits"`
-	Uniquehits            string   `json:"uniquehits"`
-	Imageurl              string   `json:"imageurl"`
-	EmailExists           string   `json:"emailExists"`
-	DomainExists          string   `json:"domainExists"`
-	Company               string   `json:"company"`
-	Title                 string   `json:"title"`
-	Domainname            string   `json:"domainname"`
-	Domaincompany         string   `json:"domaincompany"`
-	Domaincountryname     string   `json:"domaincountryname"`
-	Domaincategory        string   `json:"domaincategory"`
-	Domaincorporate       string   `json:"domaincorporate"`
-	Domainrisklevel       string   `json:"domainrisklevel"`
-	Domainrelevantinfo    string   `json:"domainrelevantinfo"`
-	DomainrisklevelID     string   `json:"domainrisklevelID"`
-	DomainrelevantinfoID  string   `json:"domainrelevantinfoID"`
-	Domainriskcountry     string   `json:"domainriskcountry"`
-	Smlinks               []SMLink `json:"smlinks"`
-	PhoneStatus           string   `json:"phone_status"`
-	Shipforward           string   `json:"shipforward"`
+	Userdefinedrecordid   string   `json:"userdefinedrecordid,omitempty"`
+	Email                 string   `json:"email,omitempty"`
+	EName                 string   `json:"eName,omitempty"`
+	EmailAge              string   `json:"emailAge,omitempty"`
+	EmailCreationDays     string   `json:"email_creation_days,omitempty"`
+	DomainAge             string   `json:"domainAge,omitempty"`
+	DomainCreationDays    string   `json:"domain_creation_days,omitempty"`
+	FirstVerificationDate string   `json:"firstVerificationDate,omitempty"`
+	FirstSeenDays         string   `json:"first_seen_days,omitempty"`
+	LastVerificationDate  string   `json:"lastVerificationDate,omitempty"`
+	Status                string   `json:"status,omitempty"`
+	Country               string   `json:"country,omitempty"`
+	FraudRisk             string   `json:"fraudRisk,omitempty"`
+	EAScore               string   `json:"EAScore,omitempty"`
+	EAReason              string   `json:"EAReason,omitempty"`
+	EAStatusID            string   `json:"EAStatusID,omitempty"`
+	EAReasonID            string   `json:"EAReasonID,omitempty"`
+	EAAdviceID            string   `json:"EAAdviceID,omitempty"`
+	EAAdvice              string   `json:"EAAdvice,omitempty"`
+	EARiskBandID          string   `json:"EARiskBandID,omitempty"`
+	EARiskBand            string   `json:"EARiskBand,omitempty"`
+	SourceIndustry        string   `json:"source_industry,omitempty"`
+	FraudType             string   `json:"fraud_type,omitempty"`
+	Lastflaggedon         string   `json:"lastflaggedon,omitempty"`
+	Dob                   string   `json:"dob,omitempty"`
+	Gender                string   `json:"gender,omitempty"`
+	Location              string   `json:"location,omitempty"`
+	Smfriends             string   `json:"smfriends,omitempty"`
+	Totalhits             string   `json:"totalhits,omitempty"`
+	Uniquehits            string   `json:"uniquehits,omitempty"`
+	Imageurl              string   `json:"imageurl,omitempty"`
+	EmailExists           string   `json:"emailExists,omitempty"`
+	DomainExists          string   `json:"domainExists,omitempty"`
+	Company               string   `json:"company,omitempty"`
+	Title                 string   `json:"title,omitempty"`
+	Domainname            string   `json:"domainname,omitempty"`
+	Domaincompany         string   `json:"domaincompany,omitempty"`
+	Domaincountryname     string   `json:"domaincountryname,omitempty"`
+	Domaincategory        string   `json:"domaincategory,omitempty"`
+	Domaincorporate       string   `json:"domaincorporate,omitempty"`
+	Domainrisklevel       string   `json:"domainrisklevel,omitempty"`
+	Domainrelevantinfo    string   `json:"domainrelevantinfo,omitempty"`
+	DomainrisklevelID     string   `json:"domainrisklevelID,omitempty"`
+	DomainrelevantinfoID  string   `json:"domainrelevantinfoID,omitempty"`
+	Domainriskcountry     string   `json:"domainriskcountry,omitempty"`
+	Smlinks               []SMLink `json:"smlinks,omitempty"`
+	PhoneStatus           string   `json:"phone_status,omitempty"`
+	Shipforward           string   `json:"shipforward,omitempty"`
 }
 
 // FraudCodeLookup provides code to fraud message lookup
@@ -125,7 +125,8 @@ func PhoneOwnerMatchLookup(s string) string {
 	}
 }
 
-// RiskLevelLookup
+// RiskLevelLookup takes a level integer and
+// converts it to a string representation
 func RiskLevelLookup(level int) string {
 	switch level {
 	case 1:
