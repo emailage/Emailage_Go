@@ -189,6 +189,6 @@ func ErrorCodeLookup(code string) string {
 	case "3016":
 		return "Authentication Error: Invalid Signature Method"
 	default:
-		return ""
+		return "unknown error"
 	}
 }

@@ -289,7 +289,7 @@ func TestErrorCodeLookup(t *testing.T) {
 			args: args{
 				code: "9999",
 			},
-			want: "",
+			want: "unknown error",
 		},
 	}
 	for _, tt := range tests {
