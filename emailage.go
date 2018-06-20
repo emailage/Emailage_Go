@@ -94,7 +94,7 @@ func (e *Emailage) base(input string, params map[string]string) (*Response, erro
 	if err := e.call(params, &r); err != nil {
 		return nil, err
 	}
-	if r.Query.ResponseStatus.Status == "failed" {
+	if (r.Query.ResponseStatus != nil) && (r.Query.ResponseStatus.Status == "failed") {
 		return nil, errors.New(ErrorCodeLookup(r.Query.ResponseStatus.ErrorCode))
 	}
 	return &r, nil
