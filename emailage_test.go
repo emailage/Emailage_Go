@@ -270,7 +270,7 @@ func Test_removeBOM(t *testing.T) {
 
 func TestErrorCodeLookup(t *testing.T) {
 	type args struct {
-		code int
+		code string
 	}
 	tests := []struct {
 		name string
@@ -280,16 +280,16 @@ func TestErrorCodeLookup(t *testing.T) {
 		{
 			name: "invalid input",
 			args: args{
-				code: 400,
+				code: "400",
 			},
 			want: "Invalid input parameter. Error message should indicate which one",
 		},
 		{
 			name: "not found",
 			args: args{
-				code: 9999,
+				code: "9999",
 			},
-			want: "",
+			want: "unknown error",
 		},
 	}
 	for _, tt := range tests {
