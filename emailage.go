@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/mrjones/oauth"
@@ -117,6 +118,9 @@ func removeBOM(d io.ReadCloser) (io.Reader, error) {
 
 // call setups up the request to the Classic API and executes it
 func (e *Emailage) call(params map[string]string, fres interface{}) error {
+	for k, v := range params {
+		params[k] = url.QueryEscape(v)
+	}
 	res, err := e.oc.Get(e.opts.Endpoint, params, &oauth.AccessToken{})
 	if err != nil {
 		return err
