@@ -1,11 +1,12 @@
 package emailage
 
-// Response
+// Response is the overall payload returned from
+// the Classic API
 type Response struct {
 	Query *Query `json:"query"`
 }
 
-// Query
+// Query holds the relevant data for the given request
 type Query struct {
 	Email          string          `json:"email,omitempty"`
 	QueryType      string          `json:"queryType,omitempty"`
@@ -17,7 +18,7 @@ type Query struct {
 	ResponseStatus *ResponseStatus `json:"responseStatus,omitempty"`
 }
 
-// ResponseStatus
+// ResponseStatus contains the status for the given request
 type ResponseStatus struct {
 	Status      string `json:"status,omitempty"`
 	ErrorCode   string `json:"errorCode,omitempty"`
@@ -30,56 +31,111 @@ type SMLink struct {
 	Link   string `json:"link,omitempty"`
 }
 
-// Result
+// Result represents a result given back from the Classic API
 type Result struct {
-	Userdefinedrecordid   string   `json:"userdefinedrecordid,omitempty"`
-	Email                 string   `json:"email,omitempty"`
-	EName                 string   `json:"eName,omitempty"`
-	EmailAge              string   `json:"emailAge,omitempty"`
-	EmailCreationDays     string   `json:"email_creation_days,omitempty"`
-	DomainAge             string   `json:"domainAge,omitempty"`
-	DomainCreationDays    string   `json:"domain_creation_days,omitempty"`
-	FirstVerificationDate string   `json:"firstVerificationDate,omitempty"`
-	FirstSeenDays         string   `json:"first_seen_days,omitempty"`
-	LastVerificationDate  string   `json:"lastVerificationDate,omitempty"`
-	Status                string   `json:"status,omitempty"`
-	Country               string   `json:"country,omitempty"`
-	FraudRisk             string   `json:"fraudRisk,omitempty"`
-	EAScore               string   `json:"EAScore,omitempty"`
-	EAReason              string   `json:"EAReason,omitempty"`
-	EAStatusID            string   `json:"EAStatusID,omitempty"`
-	EAReasonID            string   `json:"EAReasonID,omitempty"`
-	EAAdviceID            string   `json:"EAAdviceID,omitempty"`
-	EAAdvice              string   `json:"EAAdvice,omitempty"`
-	EARiskBandID          string   `json:"EARiskBandID,omitempty"`
-	EARiskBand            string   `json:"EARiskBand,omitempty"`
-	SourceIndustry        string   `json:"source_industry,omitempty"`
-	FraudType             string   `json:"fraud_type,omitempty"`
-	Lastflaggedon         string   `json:"lastflaggedon,omitempty"`
-	Dob                   string   `json:"dob,omitempty"`
-	Gender                string   `json:"gender,omitempty"`
-	Location              string   `json:"location,omitempty"`
-	Smfriends             string   `json:"smfriends,omitempty"`
-	Totalhits             string   `json:"totalhits,omitempty"`
-	Uniquehits            string   `json:"uniquehits,omitempty"`
-	Imageurl              string   `json:"imageurl,omitempty"`
-	EmailExists           string   `json:"emailExists,omitempty"`
-	DomainExists          string   `json:"domainExists,omitempty"`
-	Company               string   `json:"company,omitempty"`
-	Title                 string   `json:"title,omitempty"`
-	Domainname            string   `json:"domainname,omitempty"`
-	Domaincompany         string   `json:"domaincompany,omitempty"`
-	Domaincountryname     string   `json:"domaincountryname,omitempty"`
-	Domaincategory        string   `json:"domaincategory,omitempty"`
-	Domaincorporate       string   `json:"domaincorporate,omitempty"`
-	Domainrisklevel       string   `json:"domainrisklevel,omitempty"`
-	Domainrelevantinfo    string   `json:"domainrelevantinfo,omitempty"`
-	DomainrisklevelID     string   `json:"domainrisklevelID,omitempty"`
-	DomainrelevantinfoID  string   `json:"domainrelevantinfoID,omitempty"`
-	Domainriskcountry     string   `json:"domainriskcountry,omitempty"`
-	Smlinks               []SMLink `json:"smlinks,omitempty"`
-	PhoneStatus           string   `json:"phone_status,omitempty"`
-	Shipforward           string   `json:"shipforward,omitempty"`
+	Email                   string   `json:"email,omitempty"`
+	EName                   string   `json:"eName,omitempty"`
+	EmailAge                string   `json:"emailAge,omitempty"`
+	EmailCreationDays       string   `json:"email_creation_days,omitempty"`
+	DomainAge               string   `json:"domainAge,omitempty"`
+	DomainCreationDays      string   `json:"domain_creation_days,omitempty"`
+	FirstVerificationDate   string   `json:"firstVerificationDate,omitempty"`
+	FirstSeenDays           string   `json:"first_seen_days,omitempty"`
+	LastVerificationDate    string   `json:"lastVerificationDate,omitempty"`
+	Status                  string   `json:"status,omitempty"`
+	Company                 string   `json:"company,omitempty"`
+	Count                   string   `json:"count,omitempty"`
+	Country                 string   `json:"country,omitempty"`
+	Created                 string   `json:"created,omitempty"`
+	FraudRisk               string   `json:"fraudRisk,omitempty"`
+	EAScore                 string   `json:"EAScore,omitempty"`
+	EAReason                string   `json:"EAReason,omitempty"`
+	EAStatusID              string   `json:"EAStatusID,omitempty"`
+	EAReasonID              string   `json:"EAReasonID,omitempty"`
+	EAAdviceID              string   `json:"EAAdviceID,omitempty"`
+	EAAdvice                string   `json:"EAAdvice,omitempty"`
+	EARiskBandID            string   `json:"EARiskBandID,omitempty"`
+	EARiskBand              string   `json:"EARiskBand,omitempty"`
+	SourceIndustry          string   `json:"source_industry,omitempty"`
+	FraudType               string   `json:"fraud_type,omitempty"`
+	LastflaggedOn           string   `json:"lastflaggedon,omitempty"`
+	DOB                     string   `json:"dob,omitempty"`
+	Gender                  string   `json:"gender,omitempty"`
+	Location                string   `json:"location,omitempty"`
+	Lang                    string   `json:"lang,omitempty"`
+	SMFriends               string   `json:"smfriends,omitempty"`
+	TotalHits               string   `json:"totalhits,omitempty"`
+	UniqueHits              string   `json:"uniquehits,omitempty"`
+	ImageURL                string   `json:"imageurl,omitempty"`
+	EmailExists             string   `json:"emailExists,omitempty"`
+	DomainExists            string   `json:"domainExists,omitempty"`
+	Title                   string   `json:"title,omitempty"`
+	DomainName              string   `json:"domainname,omitempty"`
+	DomainCompany           string   `json:"domaincompany,omitempty"`
+	DomainCountryName       string   `json:"domaincountryname,omitempty"`
+	DomainCategory          string   `json:"domaincategory,omitempty"`
+	DomainCorporate         string   `json:"domaincorporate,omitempty"`
+	DomainRiskLevel         string   `json:"domainrisklevel,omitempty"`
+	DomainRelevantInfo      string   `json:"domainrelevantinfo,omitempty"`
+	DomainRisklevelID       string   `json:"domainrisklevelID,omitempty"`
+	DomainRelevantInfoID    string   `json:"domainrelevantinfoID,omitempty"`
+	DomainRiskCountry       string   `json:"domainriskcountry,omitempty"`
+	SMLinks                 []SMLink `json:"smlinks,omitempty"`
+	PhoneStatus             string   `json:"phone_status,omitempty"`
+	ShipForward             string   `json:"shipforward,omitempty"`
+	UserdefinedRecordID     string   `json:"userdefinedrecordid,omitempty"`
+	PhoneOwner              string   `json:"phoneowner,omitempty"`
+	PhoneOwnerType          string   `json:"phoneownertype,omitempty"`
+	PhoneOwnerCarrierType   string   `json:"phoneownercarriertype,omitempty"`
+	PhoneCarrierNetworkCode string   `json:"phonecarriernetworkcode,omitempty"`
+	PhoneCarrierName        string   `json:"phonecarriername,omitempty"`
+	PhoneOwnerMatch         string   `json:"phoneownermatch,omitempty"`
+	IssuerBank              string   `json:"issuerBank,omitempty"`
+	IssuerBrand             string   `json:"issuerBrand,omitempty"`
+	IssuerCountry           string   `json:"issuerCountry,omitempty"`
+	CardCategory            string   `json:"cardCategory,omitempty"`
+	CardType                string   `json:"cardType,omitempty"`
+	NameMatch               string   `json:"namematch,omitempty"`
+	CustomerIdentifierMatch string   `json:"customeridentifiermatch,omitempty"`
+	IPRiskLevelID           string   `json:"ip_risklevelid"`
+	IPRiskLevel             string   `json:"ip_risklevel"`
+	IPRiskLevelReasonID     string   `json:"ip_risklevelReasonid"`
+	IPRiskLevelReason       string   `json:"ip_risklevelreason"`
+	IPReputation            string   `json:"ip_reputation"`
+	IPAnonymousDetected     string   `json:"ip_anonymousdetected"`
+	IPProxyType             string   `json:"ip_proxytype"`
+	IPProxyDescription      string   `json:"ip_proxydescription"`
+	IPISP                   string   `json:"ip_isp"`
+	IPOrg                   string   `json:"ip_org"`
+	IPUserType              string   `json:"ip_usertype"`
+	IPNetSpeedCell          string   `json:"ip_netSpeedCell"`
+	IPCorporateProxy        string   `json:"ip_corporateProxy"`
+	IPContinentCode         string   `json:"ip_continentCode"`
+	IPCountry               string   `json:"ip_country"`
+	IPCountryCode           string   `json:"ip_countryCode"`
+	IPRegion                string   `json:"ip_region"`
+	IPCity                  string   `json:"ip_city"`
+	IPCallingCode           string   `json:"ip_callingcode"`
+	IPMetroCode             string   `json:"ip_metroCode"`
+	IPLatitude              string   `json:"ip_latitude"`
+	IPLongitude             string   `json:"ip_longitude"`
+	IPMap                   string   `json:"ip_map"`
+	IPCountryMatch          string   `json:"ipcountrymatch"`
+	IPRiskCountry           string   `json:"ipriskcountry"`
+	IPDistanceKM            string   `json:"ipdistancekm"`
+	IPDistanceMil           string   `json:"ipdistancemil"`
+	IPAccuracyRadius        string   `json:"ipaccuracyradius"`
+	IPTimezone              string   `json:"iptimezone"`
+	IPasNum                 string   `json:"ipasnum"`
+	IPDomain                string   `json:"ipdomain"`
+	IPCountryConf           string   `json:"ip_countryconf"`
+	IPRegionConf            string   `json:"ip_regionconf"`
+	IPCityConf              string   `json:"ip_cityconf"`
+	IPPostalCode            string   `json:"ip_postalcode"`
+	IPRiskScore             string   `json:"ip_riskscore"`
+	CustPhoneInBillingLoc   string   `json:"custphoneInbillingloc"`
+	CityPostalMatch         string   `json:"citypostalmatch"`
+	ShipCityPostalMatch     string   `json:"shipcitypostalmatch"`
 }
 
 // FraudCodeLookup provides code to fraud message lookup
