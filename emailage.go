@@ -131,7 +131,6 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 		return err
 	}
 	if res.StatusCode >= 400 {
-		defer res.Body.Close()
 		buf := bytes.NewBuffer(make([]byte, 0, res.ContentLength))
 		if _, err := buf.ReadFrom(res.Body); err != nil {
 			return err
