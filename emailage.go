@@ -119,7 +119,8 @@ func removeBOM(d io.ReadCloser) (io.Reader, error) {
 // call setups up the request to the Classic API and executes it
 func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	for k, v := range params {
-		params[k] = url.QueryEscape(v)
+		t := &url.URL{Path: v}
+		params[k] = t.String()
 	}
 	res, err := e.oc.Get(e.opts.Endpoint, params, &oauth.AccessToken{})
 	if err != nil {
