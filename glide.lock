@@ -1,6 +1,0 @@
-hash: ef1981a1ed4876d597ae56a32739dbc2ed2c795dcfa9d5f8661dde6823571dc8
-updated: 2019-02-22T17:10:38.38593-07:00
-imports:
-- name: github.com/mrjones/oauth
-  version: f4e24b6d100c9436cbfe5d439581653d455490e7
-testImports: []

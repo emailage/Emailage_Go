@@ -1,3 +1,0 @@
-package: github.com/emailage/Emailage_Go
-import:
-- package: github.com/mrjones/oauth
