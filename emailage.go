@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/mrjones/oauth"
 )
 
 // ClientOpts contains fields used by the client
