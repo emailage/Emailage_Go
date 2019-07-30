@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+// interface for encapsulation
+type Random interface {
+	NewRandom() *Erandom
+}
+
 // Adapted from this code: https://nishanths.svbtle.com/do-not-seed-the-global-random
 type Erandom struct {
 	Random *rand.Rand

@@ -34,10 +34,10 @@ func New() (*oauth1, error) {
 	return oa, nil
 }
 
-func (oa *oauth1) GetRandomString(length int) {
+func (oa *oauth1) GetRandomString(length int) string {
 	var sb strings.Builder
 	for i := 0; i < length; i++ {
 		sb.WriteRune(oa.chs[oa.rnd.Random.Intn(25)])
 	}
-
+	return sb.String()
 }
