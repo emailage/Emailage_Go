@@ -1,7 +1,5 @@
 GO ?= go
-GLIDE ?= glide
 GOFLAGS = CGO_ENABLED=0
-MOCKERY ?= mockery
 LINTER ?= golint
 
 BINDIR := bin
@@ -27,10 +25,6 @@ endif
 .PHONY:
 test:
 	$(GO) test -v -cover ./...
-
-.PHONY:
-deps:
-
 
 .PHONY:
 clean:
