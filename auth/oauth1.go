@@ -89,7 +89,7 @@ func (oa *Oauth1) ToBase64(data []byte) string {
 
 func (oa *Oauth1) GetSignature(fullUrl string, method RequestMethod, hmacsha HMACSHA, token string) (string, error) {
 
-	hs, err := oa.HmacEncrypt(fullUrl, token, hmacsha)
+	hs, err := oa.HmacEncrypt(fullUrl, token+"&", hmacsha)
 	if err != nil {
 		return "", err
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/emailage/Emailage_Go"
+	"github.com/emailage/Emailage_Go/auth"
 	"io/ioutil"
 	"os"
 	"time"
@@ -39,6 +40,7 @@ func main() {
 		AccountSID:  c.AccountSID,
 		Endpoint:    c.Endpoint,
 		HTTPTimeout: 3 * time.Second,
+		Algorithm:   auth.HMACSHA512,
 	}
 	client, err := emailage.New(opts)
 	if err != nil {

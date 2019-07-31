@@ -1,6 +1,0 @@
-{
-    "account_sid": "ACCOUNT-SID",
-    "token": "TOKEN",
-    "format": "json",
-    "endpoint": "https://valid.api.endpoint.emailage.com/emailagevalidator/"
-}

@@ -3,19 +3,19 @@ package emailage
 // Response is the overall payload returned from
 // the Classic API
 type Response struct {
-	Query *Query `json:"query"`
+	Query          *Query          `json:"query"`
+	ResponseStatus *ResponseStatus `json:"responseStatus,omitempty"`
 }
 
 // Query holds the relevant data for the given request
 type Query struct {
-	Email          string          `json:"email,omitempty"`
-	QueryType      string          `json:"queryType,omitempty"`
-	Count          int64           `json:"count,omitempty"`
-	Created        string          `json:"created,omitempty"`
-	Lang           string          `json:"lang,omitempty"`
-	ResponseCount  int64           `json:"responseCount,omitempty"`
-	Results        []Result        `json:"results,omitempty"`
-	ResponseStatus *ResponseStatus `json:"responseStatus,omitempty"`
+	Email         string   `json:"email,omitempty"`
+	QueryType     string   `json:"queryType,omitempty"`
+	Count         int64    `json:"count,omitempty"`
+	Created       string   `json:"created,omitempty"`
+	Lang          string   `json:"lang,omitempty"`
+	ResponseCount int64    `json:"responseCount,omitempty"`
+	Results       []Result `json:"results,omitempty"`
 }
 
 // ResponseStatus contains the status for the given request

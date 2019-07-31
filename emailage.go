@@ -9,6 +9,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -54,8 +56,14 @@ func New(co *ClientOpts) (*Emailage, error) {
 	if err := co.validate(); err != nil {
 		return nil, err
 	}
+	a, err := auth.New()
+	if err != nil {
+		return nil, err
+	}
+
 	e := &Emailage{
 		opts: co,
+		oc:   a,
 	}
 
 	if co.HTTPTimeout > 0 {
@@ -96,8 +104,8 @@ func (e *Emailage) base(input string, params map[string]string) (*Response, erro
 	if err := e.call(params, &r); err != nil {
 		return nil, err
 	}
-	if (r.Query.ResponseStatus != nil) && (r.Query.ResponseStatus.Status == "failed") {
-		return nil, errors.New(ErrorCodeLookup(r.Query.ResponseStatus.ErrorCode))
+	if (r.ResponseStatus != nil) && (r.ResponseStatus.Status == "failed") {
+		return nil, errors.New(ErrorCodeLookup(r.ResponseStatus.ErrorCode))
 	}
 	return &r, nil
 }
@@ -121,42 +129,51 @@ func removeBOM(d io.ReadCloser) (io.Reader, error) {
 func (e *Emailage) call(params map[string]string, fres interface{}) error {
 
 	// populate authentication parameters
+	ts := time.Now().Unix()
 	params["format"] = "json"
 	params["oauth_consumer_key"] = e.opts.AccountSID
 	params["oauth_nonce"] = e.oc.GetRandomString(10)
 	params["oauth_signature_method"] = string(e.opts.Algorithm)
-	params["oauth_timestamp"] = string(time.Now().UnixNano() / 1000000)
+	params["oauth_timestamp"] = strconv.FormatInt(ts, 10)
 	params["oauth_version"] = "1.0"
 
 	for k, v := range params {
-		t := &url.URL{Path: v}
-		params[k] = t.String()
+		params[k] = url.QueryEscape(v)
 	}
 
+	// sort parameters in alphabetical order
+	i := 0
+	m := make([]string, len(params))
+	for k, _ := range params {
+		m[i] = k
+		i++
+	}
+	sort.Strings(m)
+
 	// calculate signature
-	var d bytes.Buffer
 	var q bytes.Buffer
-	d.WriteString(e.opts.Endpoint)
-	for k, v := range params {
+	for _, v := range m {
 		if v != "" {
 			if q.Len() > 1 {
 				q.WriteRune('&')
 			}
-			q.WriteString(k)
-			q.WriteRune('=')
 			q.WriteString(v)
+			q.WriteRune('=')
+			q.WriteString(params[v])
 		}
 	}
+	qs := url.QueryEscape(q.String())
 
-	s, err := e.oc.GetSignature("GET&"+e.opts.Endpoint+"&"+d.String(), auth.GET, e.opts.Algorithm, e.opts.Token)
+	s, err := e.oc.GetSignature("GET&"+url.QueryEscape(e.opts.Endpoint)+"&"+qs, auth.GET, e.opts.Algorithm, e.opts.Token)
 	if err != nil {
 		return err
 	}
 
 	q.WriteString("&oauth_signature=")
 	q.WriteString(s)
+	qs = e.opts.Endpoint + "?" + q.String()
 
-	res, err := e.HttpClient.Get(e.opts.Endpoint + "?" + q.String())
+	res, err := e.HttpClient.Get(qs)
 	if err != nil {
 		return err
 	}
