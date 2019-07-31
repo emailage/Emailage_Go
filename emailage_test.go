@@ -1,12 +1,11 @@
 package emailage
 
 import (
+	"github.com/emailage/Emailage_Go/auth"
 	"io"
 	"net/http"
 	"reflect"
 	"testing"
-
-	"github.com/mrjones/oauth"
 )
 
 func TestClientOpts_validate(t *testing.T) {
@@ -75,7 +74,6 @@ func TestClientOpts_validate(t *testing.T) {
 				Token:      tt.fields.Token,
 				AccountSID: tt.fields.AccountSID,
 				Endpoint:   tt.fields.Endpoint,
-				HTTP:       tt.fields.HTTP,
 				Format:     tt.fields.Format,
 			}
 			if err := c.validate(); (err != nil) != tt.wantErr {
@@ -107,7 +105,7 @@ func TestNew(t *testing.T) {
 				co: co,
 			},
 			want: &Emailage{
-				oc:   oauth.NewConsumer("token", "accountsid", oauth.ServiceProvider{}),
+				oc:   &auth.Oauth1{},
 				opts: co,
 			},
 			wantErr: false,
@@ -138,7 +136,7 @@ func TestNew(t *testing.T) {
 func TestEmailage_EmailOnlyScore(t *testing.T) {
 	type fields struct {
 		opts *ClientOpts
-		oc   *oauth.Consumer
+		oc   *auth.Oauth1
 	}
 	type args struct {
 		email  string
@@ -174,7 +172,7 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 func TestEmailage_IPAddressOnlyScore(t *testing.T) {
 	type fields struct {
 		opts *ClientOpts
-		oc   *oauth.Consumer
+		oc   *auth.Oauth1
 	}
 	type args struct {
 		ip     string
@@ -210,7 +208,7 @@ func TestEmailage_IPAddressOnlyScore(t *testing.T) {
 func TestEmailage_EmailAndIPScore(t *testing.T) {
 	type fields struct {
 		opts *ClientOpts
-		oc   *oauth.Consumer
+		oc   *auth.Oauth1
 	}
 	type args struct {
 		email  string

@@ -5,19 +5,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/emailage/Emailage_Go/auth"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 // ClientOpts contains fields used by the client
 type ClientOpts struct {
-	Token      string
-	AccountSID string
-	Endpoint   string
-	HTTP       *http.Client
-	Format     string
+	Token       string
+	AccountSID  string
+	Endpoint    string
+	Format      string
+	Algorithm   auth.HMACSHA
+	HTTPTimeout time.Duration
 }
 
 // validate validates that the required fields are present
@@ -38,8 +41,9 @@ func (c *ClientOpts) validate() error {
 
 // Emailage
 type Emailage struct {
-	opts *ClientOpts
-	oc   *oauth.Consumer
+	opts       *ClientOpts
+	oc         *auth.Oauth1
+	HttpClient http.Client
 }
 
 // New creates a new value of type pointer Emailage
@@ -53,10 +57,9 @@ func New(co *ClientOpts) (*Emailage, error) {
 	e := &Emailage{
 		opts: co,
 	}
-	sp := oauth.ServiceProvider{}
-	e.oc = oauth.NewConsumer(co.Token, co.AccountSID, sp)
-	if co.HTTP != nil {
-		e.oc.HttpClient = co.HTTP
+
+	if co.HTTPTimeout > 0 {
+		e.HttpClient.Timeout = co.HTTPTimeout
 	}
 	return e, nil
 }
@@ -116,15 +119,49 @@ func removeBOM(d io.ReadCloser) (io.Reader, error) {
 
 // call setups up the request to the Classic API and executes it
 func (e *Emailage) call(params map[string]string, fres interface{}) error {
+
+	// populate authentication parameters
+	params["format"] = "json"
+	params["oauth_consumer_key"] = e.opts.AccountSID
+	params["oauth_nonce"] = e.oc.GetRandomString(10)
+	params["oauth_signature_method"] = string(e.opts.Algorithm)
+	params["oauth_timestamp"] = string(time.Now().UnixNano() / 1000000)
+	params["oauth_version"] = "1.0"
+
 	for k, v := range params {
 		t := &url.URL{Path: v}
 		params[k] = t.String()
 	}
-	res, err := e.oc.Get(e.opts.Endpoint, params, &oauth.AccessToken{})
+
+	// calculate signature
+	var d bytes.Buffer
+	var q bytes.Buffer
+	d.WriteString(e.opts.Endpoint)
+	for k, v := range params {
+		if v != "" {
+			if q.Len() > 1 {
+				q.WriteRune('&')
+			}
+			q.WriteString(k)
+			q.WriteRune('=')
+			q.WriteString(v)
+		}
+	}
+
+	s, err := e.oc.GetSignature("GET&"+e.opts.Endpoint+"&"+d.String(), auth.GET, e.opts.Algorithm, e.opts.Token)
+	if err != nil {
+		return err
+	}
+
+	q.WriteString("&oauth_signature=")
+	q.WriteString(s)
+
+	res, err := e.HttpClient.Get(e.opts.Endpoint + "?" + q.String())
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
+
 	buf, err := removeBOM(res.Body)
 	if err != nil {
 		return err
