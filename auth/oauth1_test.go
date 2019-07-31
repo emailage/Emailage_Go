@@ -2,21 +2,13 @@ package auth
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"reflect"
 	"testing"
 )
 
 /*
 	Test Objects
 */
-type MockedRandom struct {
-	mock.Mock
-}
-
-func (m *MockedRandom) NewRandom() (bool, error) {
-	args := m.Called()
-	return args.Bool(0), args.Error(1)
-}
 
 type mockFunc func()
 
@@ -26,12 +18,12 @@ type mockFunc func()
 func TestNew(t *testing.T) {
 	tests := []struct {
 		name    string
-		want    *oauth1
+		want    *Oauth1
 		wantErr bool
 	}{
 		{
 			name: "empty constructor",
-			want: &oauth1{},
+			want: &Oauth1{},
 		},
 	}
 	for _, tt := range tests {
@@ -48,7 +40,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func Test_oauth1_GetRandomString(t *testing.T) {
+func Test_Oauth1_GetRandomString(t *testing.T) {
 	type fields struct {
 		rnd *Erandom
 		chs []rune
@@ -69,19 +61,60 @@ func Test_oauth1_GetRandomString(t *testing.T) {
 			args: args{
 				length: 1,
 			},
-			want:    "b",
-			wantErr: false,
+			want: "b",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			random := new(MockedRandom)
+			random, _ := NewRandom()
 			for _, mockSetup := range tt.mocks {
 				mockSetup()
 			}
-			oauth := &oauth1{
+			oauth := &Oauth1{
 				rnd: random,
-				chs: []rune{'b'},
+				chs: []rune("bbbbbbbbbbbbbbbbbbbbbbbbb"),
+			}
+			got := oauth.GetRandomString(tt.args.length)
+			if reflect.TypeOf(got).String() != "string" {
+				t.Errorf("New() = %v, want %v", got, tt.want)
+			}
+			assert.Equal(t, got, "b")
+		})
+	}
+}
+
+func Test_Oauth1_HmacEncrypt(t *testing.T) {
+	type fields struct {
+		rnd *Erandom
+		chs []rune
+	}
+	type args struct {
+		value     string
+		key       string
+		algorithm HMACSHA
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oa := &Oauth1{
+				rnd: tt.fields.rnd,
+				chs: tt.fields.chs,
+			}
+			got, err := oa.HmacEncrypt(tt.args.value, tt.args.key, tt.args.algorithm)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("HmacEncrypt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("HmacEncrypt() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
