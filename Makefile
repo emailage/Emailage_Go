@@ -4,8 +4,6 @@ LINTER ?= golint
 
 BINDIR := _examples
 BINARY := _examples
-APIPPROFDIR := apipprof
-DBPPROFDIR := dbpprof
 
 VERSION := 0.1.0
 LDFLAGS = -ldflags "-X main.gitSHA=$(shell git rev-parse HEAD) -X main.version=$(VERSION) -X main.name=$(BINARY)"
@@ -30,8 +28,8 @@ test:
 clean:
 	$(GO) clean
 	rm -f $(BINDIR)/$(BINARY)
-	rm -f $(APIPPROFDIR)/*.prof
-	rm -f $(DBPPROFDIR)/*.prof
+	rm -f ./auth/dbpprof/*.prof
+	rm -f ./dbpprof/*.prof
 
 .PHONY:
 docs:
@@ -46,16 +44,24 @@ lint:
 	$(LINTER) `$(GO) list ./... | grep -v /vendor/`
 
 .PHONY:
-mkbench:
-	mkdir ./auth/dbpprof
-	mkdir ./dbpprof
+cleanbench:
+	rm -f ./auth/dbpprof/*.prof
+	rm -f ./dbpprof/*.prof
 
 .PHONY:
-bench:
+mkbench:
+	if [ ! -d "./auth/dbpprof" ]; then mkdir ./auth/dbpprof; fi
+	if [ ! -d "./dbpprof"]; then mkdir ./dbpprof; fi
+
+.PHONY:
+bench_run:
 	$(GO) test -bench=. -benchmem -benchtime=300ms -run=XXX ./auth -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
 	mv ./*.prof ./auth/dbpprof
 	$(GO) test -bench=. -benchmem -benchtime=300ms -run=XXX ./ -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
 	mv ./*.prof ./dbpprof
+
+.PHONY:
+bench: | mkbench cleanbench bench_run
 
 # use the new google UI for pprof
 # requires installation via:
