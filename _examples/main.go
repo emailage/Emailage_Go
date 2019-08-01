@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/emailage/Emailage_Go"
+	"github.com/emailage/Emailage_Go/auth"
 	"io/ioutil"
 	"os"
-
-	"github.com/emailage/Emailage_Go"
+	"time"
 )
 
 type config struct {
@@ -34,10 +35,12 @@ func main() {
 		os.Exit(1)
 	}
 	opts := &emailage.ClientOpts{
-		Format:     c.Format,
-		Token:      c.Token,
-		AccountSID: c.AccountSID,
-		Endpoint:   c.Endpoint,
+		Format:      c.Format,
+		Token:       c.Token,
+		AccountSID:  c.AccountSID,
+		Endpoint:    c.Endpoint,
+		HTTPTimeout: 3 * time.Second,
+		Algorithm:   auth.HMACSHA512,
 	}
 	client, err := emailage.New(opts)
 	if err != nil {

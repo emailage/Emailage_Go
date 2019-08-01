@@ -5,26 +5,34 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/emailage/Emailage_Go/auth"
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
+	"sort"
+	"strconv"
+	"time"
+)
 
-	"github.com/mrjones/oauth"
+type ResponseFormat string
+
+const (
+	JSON ResponseFormat = "json"
+	XML  ResponseFormat = "xml"
 )
 
 // ClientOpts contains fields used by the client
 type ClientOpts struct {
-	Token      string
-	AccountSID string
-	Endpoint   string
-	HTTP       *http.Client
-	Format     string
+	Token       string
+	AccountSID  string
+	Endpoint    string
+	Format      ResponseFormat
+	Algorithm   auth.HMACSHA
+	HTTPTimeout time.Duration
 }
 
 // validate validates that the required fields are present
 func (c *ClientOpts) validate() error {
-	format := strings.ToLower(c.Format)
 	switch {
 	case c.Token == "":
 		return errors.New("missing token")
@@ -32,7 +40,7 @@ func (c *ClientOpts) validate() error {
 		return errors.New("missing AccountSID")
 	case c.Endpoint == "":
 		return errors.New("missing endpoint")
-	case format != "json" && format != "xml":
+	case c.Format != "json" && c.Format != "xml":
 		return errors.New("unsupported or missing response format. Only JSON or XML is supported")
 	}
 	return nil
@@ -40,8 +48,9 @@ func (c *ClientOpts) validate() error {
 
 // Emailage
 type Emailage struct {
-	opts *ClientOpts
-	oc   *oauth.Consumer
+	opts       *ClientOpts
+	oc         auth.Authorizer
+	HttpClient http.Client
 }
 
 // New creates a new value of type pointer Emailage
@@ -52,13 +61,18 @@ func New(co *ClientOpts) (*Emailage, error) {
 	if err := co.validate(); err != nil {
 		return nil, err
 	}
+	a, err := auth.New()
+	if err != nil {
+		return nil, err
+	}
+
 	e := &Emailage{
 		opts: co,
+		oc:   a,
 	}
-	sp := oauth.ServiceProvider{}
-	e.oc = oauth.NewConsumer(co.Token, co.AccountSID, sp)
-	if co.HTTP != nil {
-		e.oc.HttpClient = co.HTTP
+
+	if co.HTTPTimeout > 0 {
+		e.HttpClient.Timeout = co.HTTPTimeout
 	}
 	return e, nil
 }
@@ -83,11 +97,11 @@ func (e *Emailage) EmailAndIPScore(email, ip string, params map[string]string) (
 // that call to the API
 func (e *Emailage) base(input string, params map[string]string) (*Response, error) {
 	if params != nil {
-		params["format"] = e.opts.Format
+		params["format"] = string(e.opts.Format)
 		params["query"] = input
 	} else {
 		params = map[string]string{
-			"format": e.opts.Format,
+			"format": string(e.opts.Format),
 			"query":  input,
 		}
 	}
@@ -95,8 +109,8 @@ func (e *Emailage) base(input string, params map[string]string) (*Response, erro
 	if err := e.call(params, &r); err != nil {
 		return nil, err
 	}
-	if (r.Query.ResponseStatus != nil) && (r.Query.ResponseStatus.Status == "failed") {
-		return nil, errors.New(ErrorCodeLookup(r.Query.ResponseStatus.ErrorCode))
+	if (r.ResponseStatus != nil) && (r.ResponseStatus.Status == "failed") {
+		return nil, errors.New(ErrorCodeLookup(r.ResponseStatus.ErrorCode))
 	}
 	return &r, nil
 }
@@ -118,15 +132,58 @@ func removeBOM(d io.ReadCloser) (io.Reader, error) {
 
 // call setups up the request to the Classic API and executes it
 func (e *Emailage) call(params map[string]string, fres interface{}) error {
+
+	// populate authentication parameters
+	ts := time.Now().Unix()
+	params["format"] = "json"
+	params["oauth_consumer_key"] = e.opts.AccountSID
+	params["oauth_nonce"] = e.oc.GetRandomString(10)
+	params["oauth_signature_method"] = string(e.opts.Algorithm)
+	params["oauth_timestamp"] = strconv.FormatInt(ts, 10)
+	params["oauth_version"] = "1.0"
+
 	for k, v := range params {
-		t := &url.URL{Path: v}
-		params[k] = t.String()
+		params[k] = url.QueryEscape(v)
 	}
-	res, err := e.oc.Get(e.opts.Endpoint, params, &oauth.AccessToken{})
+
+	// sort parameters in alphabetical order
+	i := 0
+	m := make([]string, len(params))
+	for k := range params {
+		m[i] = k
+		i++
+	}
+	sort.Strings(m)
+
+	// calculate signature
+	var q bytes.Buffer
+	for _, v := range m {
+		if v != "" {
+			if q.Len() > 1 {
+				q.WriteRune('&')
+			}
+			q.WriteString(v)
+			q.WriteRune('=')
+			q.WriteString(params[v])
+		}
+	}
+	qs := url.QueryEscape(q.String())
+
+	s, err := e.oc.GetSignature("GET&"+url.QueryEscape(e.opts.Endpoint)+"&"+qs, auth.GET, e.opts.Algorithm, e.opts.Token)
+	if err != nil {
+		return err
+	}
+
+	q.WriteString("&oauth_signature=")
+	q.WriteString(s)
+	qs = e.opts.Endpoint + "?" + q.String()
+
+	res, err := e.HttpClient.Get(qs)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
+
 	buf, err := removeBOM(res.Body)
 	if err != nil {
 		return err

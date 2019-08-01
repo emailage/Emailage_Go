@@ -25,9 +25,15 @@ _testmain.go
 *.test
 *.prof
 
+#Jetbrains files
 .idea
 *.iml
 
+# Example files
 _examples/client
 _examples/_examples
 _examples/config.json
+
+# profiling files
+dbpprof
+auth/dbpprof
