@@ -11,8 +11,14 @@ import (
 	"net/url"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
+)
+
+type ResponseFormat string
+
+const (
+	JSON ResponseFormat = "json"
+	XML  ResponseFormat = "xml"
 )
 
 // ClientOpts contains fields used by the client
@@ -20,14 +26,13 @@ type ClientOpts struct {
 	Token       string
 	AccountSID  string
 	Endpoint    string
-	Format      string
+	Format      ResponseFormat
 	Algorithm   auth.HMACSHA
 	HTTPTimeout time.Duration
 }
 
 // validate validates that the required fields are present
 func (c *ClientOpts) validate() error {
-	format := strings.ToLower(c.Format)
 	switch {
 	case c.Token == "":
 		return errors.New("missing token")
@@ -35,7 +40,7 @@ func (c *ClientOpts) validate() error {
 		return errors.New("missing AccountSID")
 	case c.Endpoint == "":
 		return errors.New("missing endpoint")
-	case format != "json" && format != "xml":
+	case c.Format != "json" && c.Format != "xml":
 		return errors.New("unsupported or missing response format. Only JSON or XML is supported")
 	}
 	return nil
@@ -44,7 +49,7 @@ func (c *ClientOpts) validate() error {
 // Emailage
 type Emailage struct {
 	opts       *ClientOpts
-	oc         *auth.Oauth1
+	oc         auth.Authorizer
 	HttpClient http.Client
 }
 
@@ -92,11 +97,11 @@ func (e *Emailage) EmailAndIPScore(email, ip string, params map[string]string) (
 // that call to the API
 func (e *Emailage) base(input string, params map[string]string) (*Response, error) {
 	if params != nil {
-		params["format"] = e.opts.Format
+		params["format"] = string(e.opts.Format)
 		params["query"] = input
 	} else {
 		params = map[string]string{
-			"format": e.opts.Format,
+			"format": string(e.opts.Format),
 			"query":  input,
 		}
 	}
@@ -144,7 +149,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	// sort parameters in alphabetical order
 	i := 0
 	m := make([]string, len(params))
-	for k, _ := range params {
+	for k := range params {
 		m[i] = k
 		i++
 	}

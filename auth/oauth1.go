@@ -30,6 +30,11 @@ const (
 	c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~"
 )
 
+type Authorizer interface {
+	GetSignature(string, RequestMethod, HMACSHA, string) (string, error)
+	GetRandomString(length int) string
+}
+
 type Oauth1 struct {
 	rnd *Erandom
 	chs []rune

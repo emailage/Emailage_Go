@@ -2,8 +2,8 @@ GO ?= go
 GOFLAGS = CGO_ENABLED=0
 LINTER ?= golint
 
-BINDIR := bin
-BINARY := tarantula
+BINDIR := _examples
+BINARY := _examples
 APIPPROFDIR := apipprof
 DBPPROFDIR := dbpprof
 
@@ -46,12 +46,16 @@ lint:
 	$(LINTER) `$(GO) list ./... | grep -v /vendor/`
 
 .PHONY:
-bench:
-	$(GO) test -bench=By100 -benchmem -benchtime=300ms -run=XXX ./database -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
-	mv ./*.prof ./dbpprof
+mkbench:
+	mkdir ./auth/dbpprof
+	mkdir ./dbpprof
 
-	$(GO) test -bench=Translate -benchmem -benchtime=300ms -run=XXX ./api -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
-	mv ./*.prof ./apipprof
+.PHONY:
+bench:
+	$(GO) test -bench=. -benchmem -benchtime=300ms -run=XXX ./auth -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
+	mv ./*.prof ./auth/dbpprof
+	$(GO) test -bench=. -benchmem -benchtime=300ms -run=XXX ./ -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
+	mv ./*.prof ./dbpprof
 
 # use the new google UI for pprof
 # requires installation via:
@@ -59,9 +63,9 @@ bench:
 # go get github.com/google/pprof
 #
 .PHONY:
-db_cpu_prof:
-	pprof -http ":8888" dbpprof/cpu.prof
+auth_cpu_prof:
+	pprof -http ":8888" auth/dbpprof/cpu.prof
 
 .PHONY:
-api_cpu_prof:
-	pprof -http ":8888" apipprof/cpu.prof
+emailage_cpu_prof:
+	pprof -http ":8888" dbpprof/cpu.prof

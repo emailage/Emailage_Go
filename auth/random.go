@@ -27,6 +27,10 @@ func NewRandom() (*Erandom, error) {
 	return r, nil
 }
 
+func (r *Erandom) MakeRandom(random *rand.Rand) {
+	r.Random = random
+}
+
 // locked to prevent concurrent use of the underlying source
 type lockedRandSource struct {
 	lock sync.Mutex // protects src
