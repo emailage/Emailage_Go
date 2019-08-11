@@ -121,7 +121,7 @@ func (e *Emailage) base(input string, params map[string]string) (*Response, erro
 // bytes take the form of a Byte Order Mark and will not allow
 // the received JSON to be marshalled correctly otherwise
 func removeBOM(d io.ReadCloser) (io.Reader, error) {
-	buf := bufio.NewReader(d)
+	var buf = bufio.NewReader(d)
 	r, _, err := buf.ReadRune()
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	ts := time.Now().Unix()
 	params["format"] = "json"
 	params["oauth_consumer_key"] = e.opts.AccountSID
-	params["oauth_nonce"] = e.oc.GetRandomString(10)
+	params["oauth_nonce"] = e.oc.RandomString(10)
 	params["oauth_signature_method"] = string(e.opts.Algorithm)
 	params["oauth_timestamp"] = strconv.FormatInt(ts, 10)
 	params["oauth_version"] = "1.0"
@@ -149,8 +149,8 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	}
 
 	// sort parameters in alphabetical order
-	i := 0
-	m := make([]string, len(params))
+	var i int = 0
+	var m []string = make([]string, len(params))
 	for k := range params {
 		m[i] = k
 		i++
@@ -180,8 +180,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	}
 
 	fmt.Fprintf(&q, "&oauth_signature=%s", s)
-	qs := e.opts.Endpoint + "?" + q.String()
-
+	var qs = e.opts.Endpoint + "?" + q.String()
 	res, err := e.HttpClient.Get(qs)
 	if err != nil {
 		return err

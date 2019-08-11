@@ -26,7 +26,7 @@ func (s *authorizer) GetSignature(fullUrl string, method auth.RequestMethod, hma
 	return args.String(0), args.Error(1)
 }
 
-func (s *authorizer) GetRandomString(length int) string {
+func (s *authorizer) RandomString(length int) string {
 	args := s.Called(length)
 	return args.String(0)
 }
@@ -327,7 +327,7 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 			},
 			authMocks: []mockFuncAuth{
 				func(auth *authorizer) {
-					auth.On("GetRandomString", mock.Anything).Return("asdfghjkl;")
+					auth.On("RandomString", mock.Anything).Return("asdfghjkl;")
 					auth.On("GetSignature", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("hmacsignature", nil)
 				},
 			},
