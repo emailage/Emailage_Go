@@ -55,9 +55,9 @@ mkbench:
 
 .PHONY:
 bench_run:
-	$(GO) test -bench=. -benchmem -benchtime=300ms -run=XXX ./auth -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
+	$(GO) test -bench=. -benchmem -benchtime=1s -run=XXX ./auth -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
 	mv ./*.prof ./auth/dbpprof
-	$(GO) test -bench=. -benchmem -benchtime=300ms -run=XXX ./ -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
+	$(GO) test -bench=. -benchmem -benchtime=1s -run=XXX ./ -blockprofile=block.prof -cpuprofile=cpu.prof -memprofile=mem.prof -mutexprofile=mutex.prof
 	mv ./*.prof ./dbpprof
 
 .PHONY:
