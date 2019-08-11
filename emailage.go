@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/emailage/Emailage_Go/auth"
 	"io"
 	"net/http"
@@ -171,18 +172,14 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 
 	// calculate full url
 	var u strings.Builder
-	u.WriteString("GET&")
-	u.WriteString(url.QueryEscape(e.opts.Endpoint))
-	u.WriteRune('&')
-	u.WriteString(url.QueryEscape(q.String()))
+	fmt.Fprintf(&u, "GET&%s&%s", url.QueryEscape(e.opts.Endpoint), url.QueryEscape(q.String()))
 
 	s, err := e.oc.GetSignature(u.String(), auth.GET, e.opts.Algorithm, e.opts.Token)
 	if err != nil {
 		return err
 	}
 
-	q.WriteString("&oauth_signature=")
-	q.WriteString(s)
+	fmt.Fprintf(&q, "&oauth_signature=%s", s)
 	qs := e.opts.Endpoint + "?" + q.String()
 
 	res, err := e.HttpClient.Get(qs)
