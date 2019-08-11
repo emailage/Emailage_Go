@@ -168,7 +168,6 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 			q.WriteString(params[v])
 		}
 	}
-	qs := url.QueryEscape(q.String())
 
 	// calculate full url
 	var u strings.Builder
@@ -184,7 +183,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 
 	q.WriteString("&oauth_signature=")
 	q.WriteString(s)
-	qs = e.opts.Endpoint + "?" + q.String()
+	qs := e.opts.Endpoint + "?" + q.String()
 
 	res, err := e.HttpClient.Get(qs)
 	if err != nil {
