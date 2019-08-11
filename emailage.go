@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -156,7 +157,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	sort.Strings(m)
 
 	// calculate signature
-	var q bytes.Buffer
+	var q strings.Builder
 	for _, v := range m {
 		if v != "" {
 			if q.Len() > 1 {
@@ -169,7 +170,14 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	}
 	qs := url.QueryEscape(q.String())
 
-	s, err := e.oc.GetSignature("GET&"+url.QueryEscape(e.opts.Endpoint)+"&"+qs, auth.GET, e.opts.Algorithm, e.opts.Token)
+	// calculate full url
+	var u strings.Builder
+	u.WriteString("GET&")
+	u.WriteString(url.QueryEscape(e.opts.Endpoint))
+	u.WriteRune('&')
+	u.WriteString(url.QueryEscape(q.String()))
+
+	s, err := e.oc.GetSignature(u.String(), auth.GET, e.opts.Algorithm, e.opts.Token)
 	if err != nil {
 		return err
 	}
