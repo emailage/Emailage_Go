@@ -51,7 +51,7 @@ cleanbench:
 .PHONY:
 mkbench:
 	if [ ! -d "./auth/dbpprof" ]; then mkdir ./auth/dbpprof; fi
-	if [ ! -d "./dbpprof"]; then mkdir ./dbpprof; fi
+	if [ ! -d "./dbpprof" ]; then mkdir ./dbpprof; fi
 
 .PHONY:
 bench_run:
