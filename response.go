@@ -137,17 +137,17 @@ type Result struct {
 	UniqueHits                         string   `json:"uniquehits"`
 	UserdefinedRecordID                string   `json:"userdefinedrecordid"`
 	OverallDigitalIdentityScore        string   `json:"overallDigitalIdentityScore"`
-	EmailToIpConfidence                string   `json:"emailToIpConfidence"`
+	EmailToIPConfidence                string   `json:"emailToIpConfidence"`
 	EmailToPhoneConfidence             string   `json:"emailToPhoneConfidence"`
 	EmailToBillAddressConfidence       string   `json:"emailToBillAddressConfidence"`
 	EmailToShipAddressConfidence       string   `json:"emailToShipAddressConfidence"`
 	EmailToFullNameConfidence          string   `json:"emailToFullNameConfidence"`
 	EmailToLastNameConfidence          string   `json:"emailToLastNameConfidence"`
-	IpToPhoneConfidence                string   `json:"ipToPhoneConfidence"`
-	IpToBillAddressConfidence          string   `json:"ipToBillAddressConfidence"`
-	IpToShipAddressConfidence          string   `json:"ipToShipAddressConfidence"`
-	IpToFullNameConfidence             string   `json:"ipToFullNameConfidence"`
-	IpToLastNameConfidence             string   `json:"ipToLastNameConfidence"`
+	IPToPhoneConfidence                string   `json:"ipToPhoneConfidence"`
+	IPToBillAddressConfidence          string   `json:"ipToBillAddressConfidence"`
+	IPToShipAddressConfidence          string   `json:"ipToShipAddressConfidence"`
+	IPToFullNameConfidence             string   `json:"ipToFullNameConfidence"`
+	IPToLastNameConfidence             string   `json:"ipToLastNameConfidence"`
 	PhoneToBillAddressConfidence       string   `json:"phoneToBillAddressConfidence"`
 	PhoneToShipAddressConfidence       string   `json:"phoneToShipAddressConfidence"`
 	PhoneToFullNameConfidence          string   `json:"phoneToFullNameConfidence"`

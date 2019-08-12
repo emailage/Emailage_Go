@@ -32,7 +32,7 @@ const (
 
 type Authorizer interface {
 	GetSignature(string, RequestMethod, HMACSHA, string) (string, error)
-	GetRandomString(length int) string
+	RandomString(length int) string
 }
 
 type Oauth1 struct {
@@ -57,7 +57,7 @@ func New() (*Oauth1, error) {
 	return oa, nil
 }
 
-func (oa *Oauth1) GetRandomString(length int) string {
+func (oa *Oauth1) RandomString(length int) string {
 	var sb strings.Builder
 	for i := 0; i < length; i++ {
 		sb.WriteRune(oa.chs[oa.rnd.Random.Intn(25)])
@@ -82,7 +82,7 @@ func (oa *Oauth1) HmacEncrypt(value string, key string, algorithm HMACSHA) ([]by
 		return nil, fmt.Errorf("Unknown algorithm: %s", algorithm)
 	}
 
-	h := hmac.New(a, []byte(key))
+	var h = hmac.New(a, []byte(key))
 	h.Write([]byte(value))
 
 	return h.Sum(nil), nil
@@ -99,7 +99,7 @@ func (oa *Oauth1) GetSignature(fullUrl string, method RequestMethod, hmacsha HMA
 		return "", err
 	}
 
-	b64 := oa.ToBase64(hs)
+	var b64 = oa.ToBase64(hs)
 	var r = url.QueryEscape(b64)
 	return r, nil
 }

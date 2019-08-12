@@ -76,7 +76,7 @@ func Test_Oauth1_GetRandomString(t *testing.T) {
 				rnd: random,
 				chs: []rune("bbbbbbbbbbbbbbbbbbbbbbbbb"),
 			}
-			got := oauth.GetRandomString(tt.args.length)
+			got := oauth.RandomString(tt.args.length)
 			if reflect.TypeOf(got).String() != "string" {
 				t.Errorf("New() = %v, want %v", got, tt.want)
 			}
@@ -225,7 +225,7 @@ func TestOauth1_GetSignature(t *testing.T) {
 func BenchmarkOauth1_GetRandomString(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		oauth, _ := New()
-		oauth.GetRandomString(10)
+		oauth.RandomString(10)
 	}
 }
 func BenchmarkOauth1_HmacEncrypt(b *testing.B) {

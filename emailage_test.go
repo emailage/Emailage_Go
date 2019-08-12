@@ -21,12 +21,12 @@ type authorizer struct {
 	mock.Mock
 }
 
-func (s *authorizer) GetSignature(fullUrl string, method auth.RequestMethod, hmacsha auth.HMACSHA, token string) (string, error) {
-	args := s.Called(fullUrl, method, hmacsha, token)
+func (s *authorizer) GetSignature(fullURL string, method auth.RequestMethod, hmacsha auth.HMACSHA, token string) (string, error) {
+	args := s.Called(fullURL, method, hmacsha, token)
 	return args.String(0), args.Error(1)
 }
 
-func (s *authorizer) GetRandomString(length int) string {
+func (s *authorizer) RandomString(length int) string {
 	args := s.Called(length)
 	return args.String(0)
 }
@@ -327,7 +327,7 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 			},
 			authMocks: []mockFuncAuth{
 				func(auth *authorizer) {
-					auth.On("GetRandomString", mock.Anything).Return("asdfghjkl;")
+					auth.On("RandomString", mock.Anything).Return("asdfghjkl;")
 					auth.On("GetSignature", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("hmacsignature", nil)
 				},
 			},
@@ -382,7 +382,7 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 			e := &Emailage{
 				opts:       tt.fields.opts,
 				oc:         oa,
-				HttpClient: http.Client{},
+				HTTPClient: http.Client{},
 			}
 			got, err := e.EmailOnlyScore(tt.args.email, tt.args.params)
 			assert.Equal(t, 1, httpmock.GetTotalCallCount())

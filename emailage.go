@@ -5,20 +5,25 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/emailage/Emailage_Go/auth"
 	"io"
 	"net/http"
 	"net/url"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
+// ResponseFormat that the server will return
 type ResponseFormat string
 
 const (
+	// JSON Request JSON formatted data from the EmailRisk API
 	JSON ResponseFormat = "json"
-	XML  ResponseFormat = "xml"
+	// XML Request XML formatted data from the EmailRisk API
+	XML ResponseFormat = "xml"
 )
 
 // ClientOpts contains fields used by the client
@@ -46,11 +51,11 @@ func (c *ClientOpts) validate() error {
 	return nil
 }
 
-// Emailage
+// Emailage Configuration object for the emailage type
 type Emailage struct {
 	opts       *ClientOpts
 	oc         auth.Authorizer
-	HttpClient http.Client
+	HTTPClient http.Client
 }
 
 // New creates a new value of type pointer Emailage
@@ -72,7 +77,7 @@ func New(co *ClientOpts) (*Emailage, error) {
 	}
 
 	if co.HTTPTimeout > 0 {
-		e.HttpClient.Timeout = co.HTTPTimeout
+		e.HTTPClient.Timeout = co.HTTPTimeout
 	}
 	return e, nil
 }
@@ -119,7 +124,7 @@ func (e *Emailage) base(input string, params map[string]string) (*Response, erro
 // bytes take the form of a Byte Order Mark and will not allow
 // the received JSON to be marshalled correctly otherwise
 func removeBOM(d io.ReadCloser) (io.Reader, error) {
-	buf := bufio.NewReader(d)
+	var buf = bufio.NewReader(d)
 	r, _, err := buf.ReadRune()
 	if err != nil {
 		return nil, err
@@ -137,7 +142,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	ts := time.Now().Unix()
 	params["format"] = "json"
 	params["oauth_consumer_key"] = e.opts.AccountSID
-	params["oauth_nonce"] = e.oc.GetRandomString(10)
+	params["oauth_nonce"] = e.oc.RandomString(10)
 	params["oauth_signature_method"] = string(e.opts.Algorithm)
 	params["oauth_timestamp"] = strconv.FormatInt(ts, 10)
 	params["oauth_version"] = "1.0"
@@ -147,8 +152,8 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	}
 
 	// sort parameters in alphabetical order
-	i := 0
-	m := make([]string, len(params))
+	var i int
+	var m = make([]string, len(params))
 	for k := range params {
 		m[i] = k
 		i++
@@ -156,7 +161,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	sort.Strings(m)
 
 	// calculate signature
-	var q bytes.Buffer
+	var q strings.Builder
 	for _, v := range m {
 		if v != "" {
 			if q.Len() > 1 {
@@ -167,18 +172,19 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 			q.WriteString(params[v])
 		}
 	}
-	qs := url.QueryEscape(q.String())
 
-	s, err := e.oc.GetSignature("GET&"+url.QueryEscape(e.opts.Endpoint)+"&"+qs, auth.GET, e.opts.Algorithm, e.opts.Token)
+	// calculate full url
+	var u strings.Builder
+	fmt.Fprintf(&u, "GET&%s&%s", url.QueryEscape(e.opts.Endpoint), url.QueryEscape(q.String()))
+
+	s, err := e.oc.GetSignature(u.String(), auth.GET, e.opts.Algorithm, e.opts.Token)
 	if err != nil {
 		return err
 	}
 
-	q.WriteString("&oauth_signature=")
-	q.WriteString(s)
-	qs = e.opts.Endpoint + "?" + q.String()
-
-	res, err := e.HttpClient.Get(qs)
+	fmt.Fprintf(&q, "&oauth_signature=%s", s)
+	var qs = e.opts.Endpoint + "?" + q.String()
+	res, err := e.HTTPClient.Get(qs)
 	if err != nil {
 		return err
 	}
