@@ -35,7 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 	opts := &emailage.ClientOpts{
-		Format:      c.Format,
+		Format:      emailage.JSON,
 		Token:       c.Token,
 		AccountSID:  c.AccountSID,
 		Endpoint:    c.Endpoint,
