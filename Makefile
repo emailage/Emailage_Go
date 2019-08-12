@@ -5,7 +5,7 @@ LINTER ?= golint
 BINDIR := _examples
 BINARY := _examples
 
-VERSION := 0.1.0
+VERSION := 0.1.1
 LDFLAGS = -ldflags "-X main.gitSHA=$(shell git rev-parse HEAD) -X main.version=$(VERSION) -X main.name=$(BINARY)"
 
 OS := $(shell uname)
@@ -32,16 +32,8 @@ clean:
 	rm -f ./dbpprof/*.prof
 
 .PHONY:
-docs:
-	@godoc -http=:6060 2>/dev/null &
-	@printf "To view tarantula docs, point your browser to:\n"
-	@printf "\n\thttp://127.0.0.1:6060/pkg/eateam.visualstudio.com/$(BINARY)/$(pkg)\n\n"
-	@sleep 1
-	@open "http://127.0.0.1:6060/pkg/eateam.visualstudio.com/$(BINARY)/$(pkg)"
-
-.PHONY:
 lint:
-	$(LINTER) `$(GO) list ./... | grep -v /vendor/`
+	$(LINTER)
 
 .PHONY:
 cleanbench:
