@@ -16,11 +16,14 @@ import (
 	"time"
 )
 
+// ResponseFormat that the server will return
 type ResponseFormat string
 
 const (
+	// JSON Request JSON formatted data from the EmailRisk API
 	JSON ResponseFormat = "json"
-	XML  ResponseFormat = "xml"
+	// XML Request XML formatted data from the EmailRisk API
+	XML ResponseFormat = "xml"
 )
 
 // ClientOpts contains fields used by the client
@@ -48,11 +51,11 @@ func (c *ClientOpts) validate() error {
 	return nil
 }
 
-// Emailage
+// Emailage Configuration object for the emailage type
 type Emailage struct {
 	opts       *ClientOpts
 	oc         auth.Authorizer
-	HttpClient http.Client
+	HTTPClient http.Client
 }
 
 // New creates a new value of type pointer Emailage
@@ -74,7 +77,7 @@ func New(co *ClientOpts) (*Emailage, error) {
 	}
 
 	if co.HTTPTimeout > 0 {
-		e.HttpClient.Timeout = co.HTTPTimeout
+		e.HTTPClient.Timeout = co.HTTPTimeout
 	}
 	return e, nil
 }
@@ -149,8 +152,8 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 	}
 
 	// sort parameters in alphabetical order
-	var i int = 0
-	var m []string = make([]string, len(params))
+	var i int
+	var m = make([]string, len(params))
 	for k := range params {
 		m[i] = k
 		i++
@@ -181,7 +184,7 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 
 	fmt.Fprintf(&q, "&oauth_signature=%s", s)
 	var qs = e.opts.Endpoint + "?" + q.String()
-	res, err := e.HttpClient.Get(qs)
+	res, err := e.HTTPClient.Get(qs)
 	if err != nil {
 		return err
 	}
