@@ -117,6 +117,18 @@ func (e *Emailage) base(input string, params map[string]string) (*Response, erro
 	if (r.ResponseStatus != nil) && (r.ResponseStatus.Status == "failed") {
 		return nil, errors.New(ErrorCodeLookup(r.ResponseStatus.ErrorCode))
 	}
+	var err error
+	r.Query.Email, err = url.QueryUnescape(r.Query.Email)
+	if err != nil {
+		return nil, errors.New("Could not escape returned email")
+	}
+	for _, result := range r.Query.Results {
+		result.Email, err = url.QueryUnescape(result.Email)
+		if err != nil {
+			return nil, errors.New("Could not escape returned email")
+		}
+	}
+
 	return &r, nil
 }
 
