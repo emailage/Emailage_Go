@@ -366,6 +366,76 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Query With Standardized Addresses",
+			fields: fields{
+				opts: &ClientOpts{
+					Token:       "token",
+					AccountSID:  "sid",
+					Endpoint:    "https://api.exists.somewhere.com/",
+					Format:      JSON,
+					Algorithm:   auth.HMACSHA512,
+					HTTPTimeout: 0,
+				},
+			},
+			args: args{
+				email: "nigerian.prince@legit.ru",
+				params: map[string]string{
+					"billaddress":     "123 Any Bill Pl",
+					"billcity":        "Chandler",
+					"billregion":      "AZ",
+					"billpostal":      "85225",
+					"billcountry":     "US",
+					"shipaddress":     "123 Any Bill Pl",
+					"shipbillcity":    "Chandler",
+					"shipbillregion":  "AZ",
+					"shipbillpostal":  "85225",
+					"shipbillcountry": "US",
+				},
+			},
+			authMocks: []mockFuncAuth{
+				func(auth *authorizer) {
+					auth.On("RandomString", mock.Anything).Return("asdfghjkl;")
+					auth.On("GetSignature", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("hmacsignature", nil)
+				},
+			},
+			clientMocks: []mockFunc{
+				func() {
+					httpmock.RegisterResponder("GET",
+						`=~^https://api.exists.somewhere.com/.*`,
+						httpmock.NewStringResponder(200, `{"query":{"email":"nigerian.prince%40legit.ru","queryType":"EmailAgeVerification","count":1,"created":"2019-08-01T00:47:48Z","lang":"en-US","responseCount":1,"results":[{"userdefinedrecordid":"","email":"nigerian.prince@legit.ru","eName":"","emailAge":"","email_creation_days":"","domainAge":"2010-02-08T21:00:00Z","domain_creation_days":"3460","firstVerificationDate":"2018-05-30T17:28:08Z","first_seen_days":"427","lastVerificationDate":"2019-07-31T06:51:02Z","status":"ValidDomain","country":"RU","fraudRisk":"500 Moderate","EAScore":"500","EAReason":"Limited History for Email","EAStatusID":"4","EAReasonID":"8","EAAdviceID":"4","EAAdvice":"Moderate Fraud Risk","EARiskBandID":"3","EARiskBand":"Fraud Score 301 to 600","source_industry":"","fraud_type":"","lastflaggedon":"","dob":"","gender":"","location":"","smfriends":"","totalhits":"14","uniquehits":"1","imageurl":"","emailExists":"Not Sure","domainExists":"Yes","company":"","title":"","domainname":"legit.ru","domaincompany":"","domaincountryname":"Russian Federation","domaincategory":"","domaincorporate":"","domainrisklevel":"Moderate","domainrelevantinfo":"Valid  Domain from Russian Federation","domainrisklevelID":"3","domainrelevantinfoID":"508","domainriskcountry":"No","smlinks":[],"phone_status":"Invalid","shipforward":"","billriskcountry":"No","standardizedbillingaddress":"123 Any Bill Pl,Chandler,AZ,85225","standardizedshippingaddress":"123 Any Ship Pl,Chandler,AZ,85225","overallDigitalIdentityScore":"","emailToIpConfidence":"","emailToPhoneConfidence":"","emailToBillAddressConfidence":"","emailToShipAddressConfidence":"","emailToFullNameConfidence":"","emailToLastNameConfidence":"","ipToPhoneConfidence":"","ipToBillAddressConfidence":"","ipToShipAddressConfidence":"","ipToFullNameConfidence":"","ipToLastNameConfidence":"","phoneToBillAddressConfidence":"","phoneToShipAddressConfidence":"","phoneToFullNameConfidence":"","phoneToLastNameConfidence":"","billAddressToFullNameConfidence":"","billAddressToLastNameConfidence":"","shipAddressToBillAddressConfidence":"","shipAddressToFullNameConfidence":"","shipAddressToLastNameConfidence":""}]},"responseStatus":{"status":"success","errorCode":"0","description":""}}`))
+				},
+			},
+			want: &Response{
+				Query: &Query{
+					Email:         "nigerian.prince@legit.ru",
+					Count:         1,
+					Created:       "2019-08-01T00:47:48Z",
+					Lang:          "en-US",
+					ResponseCount: 1,
+					Results: []Result{{
+						Country:                 "RU",
+						EAAdvice:                "Moderate Fraud Risk",
+						EAAdviceID:              "4",
+						EAReason:                "Limited History for Email",
+						EAReasonID:              "8",
+						EARiskBand:              "Fraud Score 301 to 600",
+						EARiskBandID:            "3",
+						EAScore:                 "500",
+						EAStatusID:              "4",
+						Email:                   "nigerian.prince@legit.ru",
+						StandardizedBillAddress: "123 Any Bill Pl,Chandler,AZ,85225",
+						StandardizedShipAddress: "123 Any Ship Pl,Chandler,AZ,85225",
+					}},
+				},
+				ResponseStatus: &ResponseStatus{
+					Status:      "success",
+					ErrorCode:   "0",
+					Description: "",
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

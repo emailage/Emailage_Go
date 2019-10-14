@@ -157,6 +157,8 @@ type Result struct {
 	ShipAddressToBillAddressConfidence string   `json:"shipAddressToBillAddressConfidence"`
 	ShipAddressToFullNameConfidence    string   `json:"shipAddressToFullNameConfidence"`
 	ShipAddressToLastNameConfidence    string   `json:"shipAddressToLastNameConfidence"`
+	StandardizedBillAddress            string   `json:"standardizedbillingaddress"`
+	StandardizedShipAddress            string   `json:"standardizedshippingaddress"`
 }
 
 // FraudCodeLookup provides code to fraud message lookup
