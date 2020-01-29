@@ -15,7 +15,7 @@ The package no longer supports `HMAC-SHA1`, we recommend use of `HMAC-SHA256`, `
 ### Requirements
 
 ```sh
-git clone https://github.com/emailage/Emailage_Go.git
+git clone https://github.com/emailage/Emailage_Go.git 
 ```
 
 This package can be imported with:
