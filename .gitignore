@@ -34,6 +34,8 @@ _testmain.go
 _examples/client
 _examples/_examples
 _examples/config.json
+config.json
+
 
 # profiling files
 dbpprof
