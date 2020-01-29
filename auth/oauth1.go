@@ -31,7 +31,7 @@ const (
 )
 
 type Authorizer interface {
-	GetSignature(string, RequestMethod, HMACSHA, string) (string, error)
+	GetSignature(string, HMACSHA, string) (string, error)
 	RandomString(length int) string
 }
 
@@ -92,7 +92,7 @@ func (oa *Oauth1) ToBase64(data []byte) string {
 	return base64.StdEncoding.EncodeToString(data)
 }
 
-func (oa *Oauth1) GetSignature(fullUrl string, method RequestMethod, hmacsha HMACSHA, token string) (string, error) {
+func (oa *Oauth1) GetSignature(fullUrl string, hmacsha HMACSHA, token string) (string, error) {
 
 	hs, err := oa.HmacEncrypt(fullUrl, token+"&", hmacsha)
 	if err != nil {
