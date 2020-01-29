@@ -191,7 +191,6 @@ func TestOauth1_GetSignature(t *testing.T) {
 			},
 			args: args{
 				fullUrl: "http://test.com/test/",
-				method:  GET,
 				hmacsha: HMACSHA512,
 				token:   "token",
 			},
@@ -207,7 +206,7 @@ func TestOauth1_GetSignature(t *testing.T) {
 				rnd: random,
 				chs: tt.fields.chs,
 			}
-			got, err := oa.GetSignature(tt.args.fullUrl, tt.args.method, tt.args.hmacsha, tt.args.token)
+			got, err := oa.GetSignature(tt.args.fullUrl, tt.args.hmacsha, tt.args.token)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSignature() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -237,7 +236,7 @@ func BenchmarkOauth1_HmacEncrypt(b *testing.B) {
 func BenchmarkOauth1_GetSignature(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		oauth, _ := New()
-		oauth.GetSignature("http://test.com/test/", GET, HMACSHA512, "ADSFASDFASDFFASDFASDFFAF")
+		oauth.GetSignature("http://test.com/test/", HMACSHA512, "ADSFASDFASDFFASDFASDFFAF")
 	}
 }
 
