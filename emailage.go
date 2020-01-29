@@ -84,23 +84,23 @@ func New(co *ClientOpts) (*Emailage, error) {
 
 // EmailOnlyScore provides a risk score for the provided email address.
 func (e *Emailage) EmailOnlyScore(email string, params map[string]string) (*Response, error) {
-	return e.base(email, params)
+	return e.base(email, params, auth.POST)
 }
 
 // IPAddressOnlyScore provides a risk score for the provided IP address.
 func (e *Emailage) IPAddressOnlyScore(ip string, params map[string]string) (*Response, error) {
-	return e.base(ip, params)
+	return e.base(ip, params, auth.POST)
 }
 
 // EmailAndIPScore provides a risk score for the provided email/IP address
 // combination. IP4 and IP6 addresses are supported.
 func (e *Emailage) EmailAndIPScore(email, ip string, params map[string]string) (*Response, error) {
-	return e.base(email+"+"+ip, params)
+	return e.base(email+"+"+ip, params, auth.POST)
 }
 
 // base is an intermediate method call that all exposed methods call which then proxy's
 // that call to the API
-func (e *Emailage) base(input string, params map[string]string) (*Response, error) {
+func (e *Emailage) base(input string, params map[string]string, method auth.RequestMethod) (*Response, error) {
 	if params != nil {
 		params["format"] = string(e.opts.Format)
 		params["query"] = input
@@ -111,7 +111,7 @@ func (e *Emailage) base(input string, params map[string]string) (*Response, erro
 		}
 	}
 	var r Response
-	if err := e.call(params, &r); err != nil {
+	if err := e.call(params, &r, method); err != nil {
 		return nil, err
 	}
 	if (r.ResponseStatus != nil) && (r.ResponseStatus.Status == "failed") {
@@ -147,61 +147,93 @@ func removeBOM(d io.ReadCloser) (io.Reader, error) {
 	return buf, nil
 }
 
-// call setups up the request to the Classic API and executes it
-func (e *Emailage) call(params map[string]string, fres interface{}) error {
+func (e *Emailage) call(params map[string]string, fres interface{}, method auth.RequestMethod) error {
+	switch method {
+	case auth.GET:
+		return e.getRequest(params, fres)
+	case auth.POST:
+		return e.postRequest(params, fres)
+	}
+	return errors.New("Only GET and POST Http methods are supported.")
+}
+
+func (e *Emailage) postRequest(params map[string]string, fres interface{}) error {
 
 	// populate authentication parameters
-	ts := time.Now().Unix()
-	params["format"] = "json"
-	params["oauth_consumer_key"] = e.opts.AccountSID
-	params["oauth_nonce"] = e.oc.RandomString(10)
-	params["oauth_signature_method"] = string(e.opts.Algorithm)
-	params["oauth_timestamp"] = strconv.FormatInt(ts, 10)
-	params["oauth_version"] = "1.0"
+	ap := e.populateAuthParameters()
+	var qsa strings.Builder
+	qsa.WriteString("format=json&")
+	qsa.WriteString("oauth_consumer_key=" + ap["oauth_consumer_key"] + "&")
+	qsa.WriteString("oauth_nonce=" + ap["oauth_nonce"] + "&")
+	qsa.WriteString("oauth_signature_method=" + ap["oauth_signature_method"] + "&")
+	qsa.WriteString("oauth_timestamp=" + ap["oauth_timestamp"] + "&")
+	qsa.WriteString("oauth_version=1.0")
 
-	for k, v := range params {
-		params[k] = url.QueryEscape(v)
-	}
-
-	// sort parameters in alphabetical order
-	var i int
-	var m = make([]string, len(params))
-	for k := range params {
-		m[i] = k
-		i++
-	}
-	sort.Strings(m)
-
-	// calculate signature
-	var q strings.Builder
-	for _, v := range m {
-		if v != "" {
-			if q.Len() > 1 {
-				q.WriteRune('&')
-			}
-			q.WriteString(v)
-			q.WriteRune('=')
-			q.WriteString(params[v])
-		}
-	}
-
-	// calculate full url
+	// calculate full Auth url
 	var u strings.Builder
-	fmt.Fprintf(&u, "GET&%s&%s", url.QueryEscape(e.opts.Endpoint), url.QueryEscape(q.String()))
+	u.WriteString("POST&")
+	u.WriteString(url.QueryEscape(e.opts.Endpoint) + "&")
+	u.WriteString(url.QueryEscape(qsa.String()))
 
-	s, err := e.oc.GetSignature(u.String(), auth.GET, e.opts.Algorithm, e.opts.Token)
+	s, err := e.oc.GetSignature(u.String(), e.opts.Algorithm, e.opts.Token)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(&q, "&oauth_signature=%s", s)
-	var qs = e.opts.Endpoint + "?" + q.String()
-	res, err := e.HTTPClient.Get(qs)
+	var qs string
+	var res *http.Response
+	qa := fmt.Sprintf("?format=%s&oauth_version=%s&oauth_consumer_key=%s&oauth_timestamp=%s&oauth_nonce=%s&oauth_signature_method=%s&oauth_signature=%s",
+		ap["format"], ap["oauth_version"], ap["oauth_consumer_key"], ap["oauth_timestamp"], ap["oauth_nonce"], ap["oauth_signature_method"], s)
+	qs = e.opts.Endpoint + qa
+	req, err := http.NewRequest("POST", qs, bytes.NewReader([]byte(appendQSParameters(params))))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Language", "en-US")
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+	req.Header.Add("Accept-Charset", "utf-8")
+	res, err = e.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
+	return handleResponse(err, res, fres)
+}
+
+// call setups up the request to the Classic API and executes it
+func (e *Emailage) getRequest(params map[string]string, fres interface{}) error {
+
+	// populate authentication parameters
+	ap := e.populateAuthParameters()
+	q := prepareQSForSignatureCalc(ap, params)
+
+	// calculate full Auth url
+	var u strings.Builder
+	fmt.Fprintf(&u, "GET&%s&%s", url.QueryEscape(e.opts.Endpoint), url.QueryEscape(q))
+
+	s, err := e.oc.GetSignature(u.String(), e.opts.Algorithm, e.opts.Token)
+	if err != nil {
+		return err
+	}
+
+	var qs string
+	var res *http.Response
+	var qa strings.Builder
+	qa.WriteString(q)
+	fmt.Fprintf(&qa, "&oauth_signature=%s", s)
+	qs = e.opts.Endpoint + "?" + qa.String()
+	res, err = e.HTTPClient.Get(qs)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	return handleResponse(err, res, fres)
+}
+
+func handleResponse(err error, res *http.Response, fres interface{}) error {
 	buf, err := removeBOM(res.Body)
 	if err != nil {
 		return err
@@ -217,6 +249,66 @@ func (e *Emailage) call(params map[string]string, fres interface{}) error {
 		return nil
 	}
 	return json.NewDecoder(buf).Decode(fres)
+}
+
+func prepareQSForSignatureCalc(ap map[string]string, params map[string]string) string {
+	qp := make(map[string]string, len(ap)+len(params))
+	for k, v := range params {
+		qp[k] = url.QueryEscape(v)
+	}
+	for k, v := range ap {
+		qp[k] = url.QueryEscape(v)
+	}
+
+	// sort parameters in alphabetical order
+	var i int
+	var m = make([]string, len(qp))
+	for k := range qp {
+		m[i] = k
+		i++
+	}
+	sort.Strings(m)
+
+	// encode Auth parameters for calculation
+	var q strings.Builder
+	for _, v := range m {
+		if v != "" {
+			if q.Len() > 1 {
+				q.WriteRune('&')
+			}
+			q.WriteString(v)
+			q.WriteRune('=')
+			q.WriteString(params[v])
+		}
+	}
+
+	return q.String()
+}
+
+func (e *Emailage) populateAuthParameters() map[string]string {
+	ap := make(map[string]string)
+	ts := time.Now().Unix()
+	ap["format"] = "json"
+	ap["oauth_consumer_key"] = e.opts.AccountSID
+	ap["oauth_nonce"] = e.oc.RandomString(10)
+	ap["oauth_signature_method"] = string(e.opts.Algorithm)
+	ap["oauth_timestamp"] = strconv.FormatInt(ts, 10)
+	ap["oauth_version"] = "1.0"
+	return ap
+}
+func appendQSParameters(params map[string]string) string {
+	var r strings.Builder
+	for k, v := range params {
+		if v != "" {
+			if r.Len() > 1 {
+				r.WriteRune('&')
+			}
+			r.WriteString(k)
+			r.WriteRune('=')
+			r.WriteString(v)
+		}
+	}
+	return r.String()
 }
 
 // ErrorCodeLookup provies the ability to look up an error code
