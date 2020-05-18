@@ -127,6 +127,7 @@ type Result struct {
 	PhoneOwnerType                     string   `json:"phoneownertype"`
 	PhoneStatus                        string   `json:"phone_status"`
 	ShipCityPostalMatch                string   `json:"shipcitypostalmatch"`
+	DeviceIDRiskLevel                  string   `json:"deviceIdRiskLevel"`
 	ShipForward                        string   `json:"shipforward"`
 	SMFriends                          string   `json:"smfriends"`
 	SMLinks                            []SMLink `json:"smlinks"`
