@@ -5,7 +5,7 @@ LINTER ?= golint
 BINDIR := _examples
 BINARY := _examples
 
-VERSION := 0.1.4
+VERSION := 0.1.5
 LDFLAGS = -ldflags "-X main.gitSHA=$(shell git rev-parse HEAD) -X main.version=$(VERSION) -X main.name=$(BINARY)"
 
 OS := $(shell uname)
