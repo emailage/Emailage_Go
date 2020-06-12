@@ -2,7 +2,7 @@
   <a href="emailage"><img src="https://www.emailage.com/wp-content/uploads/2018/01/logo-dark.svg" width="200" height="200" border="0" alt="Emailage"></a>
 </p>
 <p align="center">
-  <a href="https://github.com/emailage/Emailage_Go/releases"><img src="https://img.shields.io/badge/version-0.1.6-green.svg?" alt="Version"></a>
+  <a href="https://github.com/emailage/Emailage_Go/releases"><img src="https://img.shields.io/badge/version-0.1.7-green.svg?" alt="Version"></a>
   <a href="https://goreportcard.com/report/github.com/emailage/Emailage_Go"><img src="https://goreportcard.com/badge/Emailage/Emailage_Go"></a>
 </p>
 

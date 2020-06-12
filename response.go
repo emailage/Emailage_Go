@@ -37,9 +37,7 @@ type Result struct {
 	CardType                           string   `json:"cardType"`
 	CityPostalMatch                    string   `json:"citypostalmatch"`
 	Company                            string   `json:"company"`
-	Count                              string   `json:"count"`
 	Country                            string   `json:"country"`
-	Created                            string   `json:"created"`
 	CustomerIdentifierMatch            string   `json:"customeridentifiermatch"`
 	CustPhoneInBillingLoc              string   `json:"custphoneInbillingloc"`
 	DOB                                string   `json:"dob"`
@@ -116,7 +114,6 @@ type Result struct {
 	IssuerBank                         string   `json:"issuerBank"`
 	IssuerBrand                        string   `json:"issuerBrand"`
 	IssuerCountry                      string   `json:"issuerCountry"`
-	Lang                               string   `json:"lang"`
 	LastFlaggedOn                      string   `json:"lastflaggedon"`
 	LastVerificationDate               string   `json:"lastVerificationDate"`
 	Location                           string   `json:"location"`
