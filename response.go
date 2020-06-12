@@ -108,8 +108,6 @@ type Result struct {
 	IPRiskCountry                      string   `json:"ipriskcountry"`
 	IPRiskLevel                        string   `json:"ip_risklevel"`
 	IPRiskLevelID                      string   `json:"ip_risklevelid"`
-	IPRiskLevelReason                  string   `json:"ip_risklevelreason"`
-	IPRiskLevelReasonID                string   `json:"ip_risklevelreasonid"`
 	IPRiskReason                       string   `json:"ip_riskreason"`
 	IPRiskReasonID                     string   `json:"ip_riskreasonid"`
 	IPRiskScore                        string   `json:"ip_riskscore"`
