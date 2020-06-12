@@ -114,7 +114,6 @@ type Result struct {
 	IssuerBank                         string   `json:"issuerBank"`
 	IssuerBrand                        string   `json:"issuerBrand"`
 	IssuerCountry                      string   `json:"issuerCountry"`
-	Lang                               string   `json:"lang"`
 	LastFlaggedOn                      string   `json:"lastflaggedon"`
 	LastVerificationDate               string   `json:"lastVerificationDate"`
 	Location                           string   `json:"location"`
