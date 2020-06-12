@@ -76,6 +76,7 @@ type Result struct {
 	Gender                             string   `json:"gender"`
 	ImageURL                           string   `json:"imageurl"`
 	IPAccuracyRadius                   string   `json:"ipaccuracyradius"`
+	IPAddress                          string   `json:"ipaddress"`
 	IPAnonymousDetected                string   `json:"ip_anonymousdetected"`
 	IPAsNum                            string   `json:"ipasnum"`
 	IPCallingCode                      string   `json:"ip_callingcode"`
@@ -98,6 +99,7 @@ type Result struct {
 	IPNetSpeedCell                     string   `json:"ip_netSpeedCell"`
 	IPOrg                              string   `json:"ip_org"`
 	IPPostalCode                       string   `json:"ip_postalcode"`
+	IPPostalConf                       string   `json:"ip_postalconf"`
 	IPProxyDescription                 string   `json:"ip_proxydescription"`
 	IPProxyType                        string   `json:"ip_proxytype"`
 	IPRegion                           string   `json:"ip_region"`
@@ -106,8 +108,8 @@ type Result struct {
 	IPRiskCountry                      string   `json:"ipriskcountry"`
 	IPRiskLevel                        string   `json:"ip_risklevel"`
 	IPRiskLevelID                      string   `json:"ip_risklevelid"`
-	IPRiskLevelReason                  string   `json:"ip_risklevelreason"`
-	IPRiskLevelReasonID                string   `json:"ip_risklevelReasonid"`
+	IPRiskReason                       string   `json:"ip_riskreason"`
+	IPRiskReasonID                     string   `json:"ip_riskreasonid"`
 	IPRiskScore                        string   `json:"ip_riskscore"`
 	IPTimezone                         string   `json:"iptimezone"`
 	IPUserType                         string   `json:"ip_usertype"`
