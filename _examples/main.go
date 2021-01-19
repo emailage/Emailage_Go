@@ -11,10 +11,12 @@ import (
 )
 
 type config struct {
-	Token      string `json:"token"`
-	AccountSID string `json:"account_sid"`
-	Format     string `json:"format"`
-	Endpoint   string `json:"endpoint"`
+	Token         string                        `json:"token"`
+	AccountSID    string                        `json:"account_sid"`
+	Format        string                        `json:"format"`
+	Endpoint      string                        `json:"endpoint"`
+	TokenEndpoint string                        `json:"token_endpoint"`
+	AuthType      emailage.AuthenticationScheme `json:"auth_type"`
 }
 
 func main() {
@@ -35,18 +37,20 @@ func main() {
 		os.Exit(1)
 	}
 	opts := &emailage.ClientOpts{
-		Format:      emailage.JSON,
-		Token:       c.Token,
-		AccountSID:  c.AccountSID,
-		Endpoint:    c.Endpoint,
-		HTTPTimeout: 3 * time.Second,
-		Algorithm:   auth.HMACSHA512,
+		Token:         c.Token,
+		TokenEndpoint: c.TokenEndpoint,
+		AccountSID:    c.AccountSID,
+		Endpoint:      c.Endpoint,
+		AuthType:      c.AuthType,
+		HTTPTimeout:   3 * time.Second,
+		Algorithm:     auth.HMACSHA512,
 	}
 	client, err := emailage.New(opts)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
 	res, err := client.EmailOnlyScore("nigerian.prince@legit.ru", nil)
 	if err != nil {
 		fmt.Println("error: ", err)
