@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -42,7 +43,6 @@ func TestClientOpts_validate(t *testing.T) {
 		AccountSID string
 		Endpoint   string
 		HTTP       *http.Client
-		Format     ResponseFormat
 	}
 	tests := []struct {
 		name    string
@@ -55,7 +55,6 @@ func TestClientOpts_validate(t *testing.T) {
 				Token:      "token",
 				AccountSID: "accountsid",
 				Endpoint:   "someendpoint",
-				Format:     JSON,
 			},
 			wantErr: false,
 		},
@@ -64,7 +63,6 @@ func TestClientOpts_validate(t *testing.T) {
 			fields: fields{
 				AccountSID: "accountsid",
 				Endpoint:   "someendpoint",
-				Format:     JSON,
 			},
 			wantErr: true,
 		},
@@ -73,7 +71,6 @@ func TestClientOpts_validate(t *testing.T) {
 			fields: fields{
 				Token:    "token",
 				Endpoint: "someendpoint",
-				Format:   JSON,
 			},
 			wantErr: true,
 		},
@@ -82,16 +79,6 @@ func TestClientOpts_validate(t *testing.T) {
 			fields: fields{
 				Token:      "token",
 				AccountSID: "accountsid",
-				Format:     JSON,
-			},
-			wantErr: true,
-		},
-		{
-			name: "missing format",
-			fields: fields{
-				Token:      "token",
-				AccountSID: "accountsid",
-				Endpoint:   "someendpoint",
 			},
 			wantErr: true,
 		},
@@ -102,7 +89,6 @@ func TestClientOpts_validate(t *testing.T) {
 				Token:      tt.fields.Token,
 				AccountSID: tt.fields.AccountSID,
 				Endpoint:   tt.fields.Endpoint,
-				Format:     tt.fields.Format,
 			}
 			if err := c.validate(); (err != nil) != tt.wantErr {
 				t.Errorf("ClientOpts.validate() error = %v, wantErr %v", err, tt.wantErr)
@@ -116,7 +102,6 @@ func TestNew(t *testing.T) {
 		Token:      "token",
 		AccountSID: "accountsid",
 		Endpoint:   "someendpoint",
-		Format:     "json",
 	}
 	type args struct {
 		co *ClientOpts
@@ -185,7 +170,7 @@ func TestEmailage_IPAddressOnlyScore(t *testing.T) {
 				opts: tt.fields.opts,
 				oc:   tt.fields.oc,
 			}
-			got, err := e.IPAddressOnlyScore(tt.args.ip, tt.args.params)
+			got, err := e.IPAddressOnlyScore(tt.args.ip, tt.args.params, OAUTH1)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Emailage.IPAddressOnlyScore() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -222,7 +207,7 @@ func TestEmailage_EmailAndIPScore(t *testing.T) {
 				opts: tt.fields.opts,
 				oc:   tt.fields.oc,
 			}
-			got, err := e.EmailAndIPScore(tt.args.email, tt.args.ip, tt.args.params)
+			got, err := e.EmailAndIPScore(tt.args.email, tt.args.ip, tt.args.params, OAUTH1)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Emailage.EmailAndIPScore() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -316,7 +301,6 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 					Token:       "token",
 					AccountSID:  "sid",
 					Endpoint:    "https://api.exists.somewhere.com/",
-					Format:      JSON,
 					Algorithm:   auth.HMACSHA512,
 					HTTPTimeout: 0,
 				},
@@ -373,7 +357,6 @@ func TestEmailage_EmailOnlyScore(t *testing.T) {
 					Token:       "token",
 					AccountSID:  "sid",
 					Endpoint:    "https://api.exists.somewhere.com/",
-					Format:      JSON,
 					Algorithm:   auth.HMACSHA512,
 					HTTPTimeout: 0,
 				},
@@ -485,14 +468,50 @@ func BenchmarkEmailage_EmailOnlyScore(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		opts := &ClientOpts{
-			Format:      "json",
 			Token:       "ASDASDFASDFFASDFASDFASFD",
 			AccountSID:  "ASDFFASDFASDFASASDFASFASDFASF",
 			Endpoint:    "https://api.exists.somewhere.com/",
 			HTTPTimeout: 3 * time.Second,
 			Algorithm:   auth.HMACSHA512,
+			AuthType:    OAUTH1,
 		}
-		client, _ := New(opts)
+		client, err := New(opts)
+		if err != nil {
+			println(err)
+			os.Exit(1)
+		}
+		client.EmailOnlyScore("nigerian.prince@legit.ru", nil)
+	}
+}
+
+func BenchmarkEmailage_EmailOnlyScore_OAUTH2(b *testing.B) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST",
+		`=~https://api.exists.somewhere.com/auth.*`,
+		httpmock.NewStringResponder(200, `{"client_id":"E4D2778DD32D41248347E2EEC4448685","access_token":"eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJFNEQyNzc4REQzMkQ0MTI0ODM0N0UyRUVDNDQ0ODY4NSIsIm5iZiI6MTYxMDc1ODc0MywiZXhwIjoxNjEwNzU5NjQzLCJpYXQiOjE2MTA3NTg3NDMsImlzcyI6Imh0dHBzOi8vYXBpLmVtYWlsYWdlLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXBpLmVtYWlsYWdlLmNvbSJ9.sEDecd3d_4ykW8V5nSU49hBMFY_0lNPOraUO2Q86mKPBrJTNmuhbFtLcgqTJ0xXMwvu8L2Mz7vecGOIhrzkajQ","token_type":"bearer","expires_in":900,"refresh_token":"jXYiDQvKfXF4SoUI0TjXroILr0HY2lveH6mxMJFVlfzo2U8eP6SYH5lXXirUkrZGbHeFd2pfsHXDvPsUAPuM5GJ2CN1DSNH7zyWZjlyT2bOZBPk84DERnvwKck8hgRF5","scope":null}`))
+
+	httpmock.RegisterResponder("POST",
+		`=~^https://api.exists.somewhere.com/`,
+		httpmock.NewStringResponder(200, `{"query":{"email":"nigerian.prince@legit.ru","queryType":"EmailAgeVerification","count":1,"created":"2019-08-01T00:47:48Z","lang":"en-US","responseCount":1,"results":[{"userdefinedrecordid":"","email":"nigerian.prince@legit.ru","eName":"","emailAge":"","email_creation_days":"","domainAge":"2010-02-08T21:00:00Z","domain_creation_days":"3460","firstVerificationDate":"2018-05-30T17:28:08Z","first_seen_days":"427","lastVerificationDate":"2019-07-31T06:51:02Z","status":"ValidDomain","country":"RU","fraudRisk":"500 Moderate","EAScore":"500","EAReason":"Limited History for Email","EAStatusID":"4","EAReasonID":"8","EAAdviceID":"4","EAAdvice":"Moderate Fraud Risk","EARiskBandID":"3","EARiskBand":"Fraud Score 301 to 600","source_industry":"","fraud_type":"","lastflaggedon":"","dob":"","gender":"","location":"","smfriends":"","totalhits":"14","uniquehits":"1","imageurl":"","emailExists":"Not Sure","domainExists":"Yes","company":"","title":"","domainname":"legit.ru","domaincompany":"","domaincountryname":"Russian Federation","domaincategory":"","domaincorporate":"","domainrisklevel":"Moderate","domainrelevantinfo":"Valid  Domain from Russian Federation","domainrisklevelID":"3","domainrelevantinfoID":"508","domainriskcountry":"No","smlinks":[],"phone_status":"","shipforward":"","overallDigitalIdentityScore":"","emailToIpConfidence":"","emailToPhoneConfidence":"","emailToBillAddressConfidence":"","emailToShipAddressConfidence":"","emailToFullNameConfidence":"","emailToLastNameConfidence":"","ipToPhoneConfidence":"","ipToBillAddressConfidence":"","ipToShipAddressConfidence":"","ipToFullNameConfidence":"","ipToLastNameConfidence":"","phoneToBillAddressConfidence":"","phoneToShipAddressConfidence":"","phoneToFullNameConfidence":"","phoneToLastNameConfidence":"","billAddressToFullNameConfidence":"","billAddressToLastNameConfidence":"","shipAddressToBillAddressConfidence":"","shipAddressToFullNameConfidence":"","shipAddressToLastNameConfidence":""}]},"responseStatus":{"status":"success","errorCode":"0","description":""}}`))
+
+	opts := &ClientOpts{
+		Token:         "ASDASDFASDFFASDFASDFASFD",
+		TokenEndpoint: "https://api.exists.somewhere.com/auth/token",
+		AccountSID:    "ASDFFASDFASDFASASDFASFASDFASF",
+		Endpoint:      "https://api.exists.somewhere.com/",
+		HTTPTimeout:   3 * time.Second,
+		Algorithm:     auth.HMACSHA512,
+		AuthType:      OAUTH2,
+	}
+	client, err := New(opts)
+	if err != nil {
+		println(err)
+		os.Exit(1)
+	}
+
+	for n := 0; n < b.N; n++ {
 		client.EmailOnlyScore("nigerian.prince@legit.ru", nil)
 	}
 }

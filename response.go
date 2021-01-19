@@ -21,7 +21,7 @@ type Query struct {
 	Custom5       string   `json:"custom5,omitempty"`
 	Custom6       string   `json:"custom6,omitempty"`
 	Custom7       string   `json:"custom7,omitempty"`
-	TrackingId    string   `json:"trackingId,omitempty"`
+	TrackingID    string   `json:"trackingId,omitempty"`
 	TransAmount   string   `json:"transAmount,omitempty"`
 	TransCurrency string   `json:"transCurrency,omitempty"`
 	ResponseCount int64    `json:"responseCount,omitempty"`
@@ -47,7 +47,7 @@ type Result struct {
 	CardType                           string   `json:"cardType"`
 	CityPostalMatch                    string   `json:"citypostalmatch"`
 	Company                            string   `json:"company"`
-	CorrelationId                      string   `json:"correlationId"`
+	CorrelationID                      string   `json:"correlationId"`
 	Country                            string   `json:"country"`
 	Custom1                            string   `json:"custom1,omitempty"`
 	Custom2                            string   `json:"custom2,omitempty"`
@@ -155,7 +155,7 @@ type Result struct {
 	Status                             string   `json:"status"`
 	Title                              string   `json:"title"`
 	TotalHits                          string   `json:"totalhits"`
-	TrackingId                         string   `json"trackingId"`
+	TrackingID                         string   `json"trackingId"`
 	TransAmount                        string   `json:"transAmount"`
 	TransCurrency                      string   `json:"transCurrency"`
 	UniqueHits                         string   `json:"uniquehits"`

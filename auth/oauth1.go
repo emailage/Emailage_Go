@@ -24,6 +24,7 @@ type RequestMethod uint8
 const (
 	GET RequestMethod = iota
 	POST
+	OAUTH2
 )
 
 const (
