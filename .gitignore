@@ -33,9 +33,9 @@ _testmain.go
 # Example files
 _examples/client
 _examples/_examples
-_examples/config.json
+_examples/config.oauth1.json
+_examples/config.oauth2.json
 config.json
-
 
 # profiling files
 dbpprof
