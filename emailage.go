@@ -3,10 +3,13 @@ package emailage
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/emailage/Emailage_Go/auth"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 	"io"
 	"net/http"
 	"net/url"
@@ -16,24 +19,26 @@ import (
 	"time"
 )
 
-// ResponseFormat that the server will return
-type ResponseFormat string
+// AuthenticationScheme describes the authentication scheme that will be used - OAUTH1 or OAUTH2.
+type AuthenticationScheme string
 
 const (
-	// JSON Request JSON formatted data from the EmailRisk API
-	JSON ResponseFormat = "json"
-	// XML Request XML formatted data from the EmailRisk API
-	XML ResponseFormat = "xml"
+	// OAUTH1 is an older, stable authentication scheme
+	OAUTH1 AuthenticationScheme = "oauth1"
+
+	// OAUTH2 is a newer authentication scheme
+	OAUTH2 AuthenticationScheme = "oauth2"
 )
 
 // ClientOpts contains fields used by the client
 type ClientOpts struct {
-	Token       string
-	AccountSID  string
-	Endpoint    string
-	Format      ResponseFormat
-	Algorithm   auth.HMACSHA
-	HTTPTimeout time.Duration
+	Token         string
+	AccountSID    string
+	Endpoint      string
+	TokenEndpoint string
+	AuthType      AuthenticationScheme
+	Algorithm     auth.HMACSHA
+	HTTPTimeout   time.Duration
 }
 
 // validate validates that the required fields are present
@@ -45,8 +50,8 @@ func (c *ClientOpts) validate() error {
 		return errors.New("missing AccountSID")
 	case c.Endpoint == "":
 		return errors.New("missing endpoint")
-	case c.Format != "json" && c.Format != "xml":
-		return errors.New("unsupported or missing response format. Only JSON or XML is supported")
+	case c.TokenEndpoint == "" && c.AuthType == OAUTH2:
+		return errors.New("a token endpoint is required with oauth2")
 	}
 	return nil
 }
@@ -56,6 +61,9 @@ type Emailage struct {
 	opts       *ClientOpts
 	oc         auth.Authorizer
 	HTTPClient http.Client
+	ctx        context.Context
+	cccfg      *clientcredentials.Config
+	oa2Token   *oauth2.Token
 }
 
 // New creates a new value of type pointer Emailage
@@ -79,34 +87,51 @@ func New(co *ClientOpts) (*Emailage, error) {
 	if co.HTTPTimeout > 0 {
 		e.HTTPClient.Timeout = co.HTTPTimeout
 	}
+	e.ctx = context.Background()
+
+	e.cccfg = &clientcredentials.Config{
+		ClientID:     e.opts.AccountSID,
+		ClientSecret: e.opts.Token,
+		Scopes:       []string{},
+		AuthStyle:    oauth2.AuthStyleInParams,
+		TokenURL:     e.opts.TokenEndpoint,
+	}
+
 	return e, nil
 }
 
 // EmailOnlyScore provides a risk score for the provided email address.
 func (e *Emailage) EmailOnlyScore(email string, params map[string]string) (*Response, error) {
-	return e.base(email, params, auth.POST)
+	return e.base(email, params)
 }
 
 // IPAddressOnlyScore provides a risk score for the provided IP address.
-func (e *Emailage) IPAddressOnlyScore(ip string, params map[string]string) (*Response, error) {
-	return e.base(ip, params, auth.POST)
+func (e *Emailage) IPAddressOnlyScore(ip string, params map[string]string, scheme AuthenticationScheme) (*Response, error) {
+	return e.base(ip, params)
 }
 
 // EmailAndIPScore provides a risk score for the provided email/IP address
 // combination. IP4 and IP6 addresses are supported.
-func (e *Emailage) EmailAndIPScore(email, ip string, params map[string]string) (*Response, error) {
-	return e.base(email+"+"+ip, params, auth.POST)
+func (e *Emailage) EmailAndIPScore(email, ip string, params map[string]string, scheme AuthenticationScheme) (*Response, error) {
+	return e.base(email+"+"+ip, params)
 }
 
 // base is an intermediate method call that all exposed methods call which then proxy's
 // that call to the API
-func (e *Emailage) base(input string, params map[string]string, method auth.RequestMethod) (*Response, error) {
+func (e *Emailage) base(input string, params map[string]string) (*Response, error) {
+	var method auth.RequestMethod
+	if e.opts.AuthType == OAUTH2 {
+		method = auth.OAUTH2
+	} else {
+		method = auth.POST
+	}
+
 	if params != nil {
-		params["format"] = string(e.opts.Format)
+		params["format"] = "json"
 		params["query"] = input
 	} else {
 		params = map[string]string{
-			"format": string(e.opts.Format),
+			"format": "json",
 			"query":  input,
 		}
 	}
@@ -153,8 +178,42 @@ func (e *Emailage) call(params map[string]string, fres interface{}, method auth.
 		return e.getRequest(params, fres)
 	case auth.POST:
 		return e.postRequest(params, fres)
+	case auth.OAUTH2:
+		return e.oauth2Request(params, fres)
 	}
-	return errors.New("Only GET and POST Http methods are supported.")
+	return errors.New("request method not supported")
+}
+
+func (e *Emailage) oauth2Request(params map[string]string, fres interface{}) error {
+	query := mapToURLValues(params)
+
+	var err error
+	if e.oa2Token == nil || !e.oa2Token.Valid() {
+		e.oa2Token, err = e.cccfg.Token(e.ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	client := e.cccfg.Client(e.ctx)
+	res, err := client.PostForm(e.opts.Endpoint+"?format=json", query)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	return handleResponse(err, res, fres)
+}
+
+func mapToURLValues(params map[string]string) url.Values {
+	if params == nil {
+		return nil
+	}
+	result := url.Values{}
+	for k, v := range params {
+		result.Add(k, v)
+	}
+	return result
 }
 
 func (e *Emailage) postRequest(params map[string]string, fres interface{}) error {
