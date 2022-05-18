@@ -8,17 +8,12 @@ BINARY := _examples
 VERSION := 0.1.9
 LDFLAGS = -ldflags "-X main.gitSHA=$(shell git rev-parse HEAD) -X main.version=$(VERSION) -X main.name=$(BINARY)"
 
-OS := $(shell uname)
+OS := $(shell go env GOHOSTOS)
 
 .PHONY:
 $(BINDIR)/$(BINARY): clean
 	if [ ! -d $(BINDIR) ]; then mkdir $(BINDIR); fi
-ifeq ($(OS),Darwin)
-	GOOS=darwin $(GOFLAGS) $(GO) build -v -o $(BINDIR)/$(BINARY) $(LDFLAGS)
-endif
-ifeq ($(OS),Linux)
-	GOOS=linux $(GOFLAGS) $(GO) build -v -o $(BINDIR)/$(BINARY) $(LDFLAGS)
-endif
+	GOOS=$(OS) $(GOFLAGS) $(GO) build -v -o $(BINDIR)/$(BINARY) $(LDFLAGS)
 
 .PHONY:
 test:
