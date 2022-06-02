@@ -9,23 +9,26 @@ type Response struct {
 
 // Query holds the relevant data for the given request
 type Query struct {
-	Email         string   `json:"email,omitempty"`
-	QueryType     string   `json:"queryType,omitempty"`
-	Count         int64    `json:"count,omitempty"`
-	Created       string   `json:"created,omitempty"`
-	Lang          string   `json:"lang,omitempty"`
-	Custom1       string   `json:"custom1,omitempty"`
-	Custom2       string   `json:"custom2,omitempty"`
-	Custom3       string   `json:"custom3,omitempty"`
-	Custom4       string   `json:"custom4,omitempty"`
-	Custom5       string   `json:"custom5,omitempty"`
-	Custom6       string   `json:"custom6,omitempty"`
-	Custom7       string   `json:"custom7,omitempty"`
-	TrackingID    string   `json:"trackingId,omitempty"`
-	TransAmount   string   `json:"transAmount,omitempty"`
-	TransCurrency string   `json:"transCurrency,omitempty"`
-	ResponseCount int64    `json:"responseCount,omitempty"`
-	Results       []Result `json:"results,omitempty"`
+	Email            string   `json:"email,omitempty"`
+	IpAddress        string   `json:"ipaddress,omitempty"`
+	QueryType        string   `json:"queryType,omitempty"`
+	Count            int64    `json:"count,omitempty"`
+	Created          string   `json:"created,omitempty"`
+	Lang             string   `json:"lang,omitempty"`
+	ResponseLanguage string   `json:"response_language,omitempty"`
+	Custom1          string   `json:"custom1,omitempty"`
+	Custom2          string   `json:"custom2,omitempty"`
+	Custom3          string   `json:"custom3,omitempty"`
+	Custom4          string   `json:"custom4,omitempty"`
+	Custom5          string   `json:"custom5,omitempty"`
+	Custom6          string   `json:"custom6,omitempty"`
+	Custom7          string   `json:"custom7,omitempty"`
+	TrackingID       string   `json:"trackingId,omitempty"`
+	TransAmount      string   `json:"transAmount,omitempty"`
+	TransCurrency    string   `json:"transCurrency,omitempty"`
+	ResponseCount    int64    `json:"responseCount,omitempty"`
+	PhoneCountryCode string   `json:"phoneCountryCode,omitempty"`
+	Results          []Result `json:"results,omitempty"`
 }
 
 // ResponseStatus contains the status for the given request
@@ -128,7 +131,7 @@ type Result struct {
 	IPRiskReasonID                     string   `json:"ip_riskreasonid"`
 	IPRiskScore                        string   `json:"ip_riskscore"`
 	IPShipCountryMatch                 string   `json:"ipShipCountryMatch""`
-	IPShipDistanceMil                  string   `json"ipShipDistanceMil"`
+	IPShipDistanceMil                  string   `json:"ipShipDistanceMil"`
 	IPShipDistanceKm                   string   `json:"ipShipDistanceKm"`
 	IPTimezone                         string   `json:"iptimezone"`
 	IPUserType                         string   `json:"ip_usertype"`
@@ -155,7 +158,7 @@ type Result struct {
 	Status                             string   `json:"status"`
 	Title                              string   `json:"title"`
 	TotalHits                          string   `json:"totalhits"`
-	TrackingID                         string   `json"trackingId"`
+	TrackingID                         string   `json:"trackingId"`
 	TransAmount                        string   `json:"transAmount"`
 	TransCurrency                      string   `json:"transCurrency"`
 	UniqueHits                         string   `json:"uniquehits"`
