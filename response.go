@@ -28,6 +28,7 @@ type Query struct {
 	TransCurrency    string   `json:"transCurrency,omitempty"`
 	ResponseCount    int64    `json:"responseCount,omitempty"`
 	PhoneCountryCode string   `json:"phoneCountryCode,omitempty"`
+	CCBinNumber      string   `json:"ccBinNumber,omitempty"`
 	Results          []Result `json:"results,omitempty"`
 }
 
